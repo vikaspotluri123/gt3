@@ -24,11 +24,12 @@ Commands:
 
   find <path-to-theme> : Finds untranslated strings
     --special-characters: Consider strings of only special characters as untranslated
+    --update: Automatically wrap untranslated strings. This will modify your theme files, so be careful!
     --fail: Exit with a non-zero exit code if any untranslated strings are found. Cannot be used with --update
     --json: Output the results in JSON format
     --verbose: Include file name and line number in the output
 
-  status <path-to-theme> : Reports the status of each locale
+  status <path-to-theme> : Reports the translation status of each locale. Empty translations are ignored.
     --all: Report fully translated locales, not just those with untranslated strings
     --base-locale=<locale>: Use this locale as the fully translated reference instead of reading the theme
 `.trimStart();
@@ -81,7 +82,7 @@ function parseCommand() {
   /** @type {CommandDefinition} */
   const command = commands[argv[2]];
   if (!command) {
-    console.error(`Unknown command: ${command}`);
+    console.error(`Unknown command: ${argv[2]}`);
     console.error(help);
     exit(1);
   }

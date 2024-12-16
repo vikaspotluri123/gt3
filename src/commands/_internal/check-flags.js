@@ -15,19 +15,19 @@ function checkFlags(args, flags, parameters) {
     }
 
     if (!flags.includes(key) && !parameters.includes(key)) {
-      console.error(`Unknown argument: ${key}`);
+      console.error(`Error: unknown argument: ${key}`);
       errored = true;
       continue;
     }
 
     if (flags.includes(key) && typeof value !== 'boolean') {
-      console.error(`Expected ${key} to be a boolean flag`);
+      console.error(`Error: expected ${key} to be a boolean flag`);
       errored = true;
       continue;
     }
 
     if (parameters.includes(key) && typeof value !== 'string') {
-      console.error(`Expected ${key} to have a value`);
+      console.error(`Error: expected ${key} to have a value`);
       errored = true;
       continue;
     }
