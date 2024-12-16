@@ -71,6 +71,14 @@ class BaseVisitor extends Visitor {
      */
     enter(node) {
         this.accept(node);
+        this.afterEnter();
+    }
+
+    /**
+     * @abstract
+     */
+    afterEnter () {
+        // Noop
     }
 };
 

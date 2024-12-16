@@ -66,11 +66,7 @@ class TextExtractorVisitor extends BaseVisitor {
         this.textToTranslate = context.textToTranslate;
     }
 
-    /**
-     * @param {Node} node
-     */
-    enter(node) {
-        super.enter(node);
+    afterEnter() {
         this.analyze();
     }
 

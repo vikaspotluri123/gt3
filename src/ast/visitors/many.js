@@ -26,6 +26,12 @@ function multiVisitor(visitors) {
         visitorInstances.push(new Visitor(options, context));
       }
     }
+
+    afterEnter() {
+      for (const visitor of this.visitors) {
+        visitor.afterEnter();
+      }
+    }
   }
 
   for (const method of VISITOR_METHODS) {
