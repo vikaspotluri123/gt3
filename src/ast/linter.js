@@ -38,7 +38,7 @@ class Linter {
             source: options.source,
         });
 
-        visitor.accept(options.parsed.ast);
+        visitor.enter(options.parsed.ast);
 
         return messages;
     }

@@ -13,4 +13,11 @@ module.exports = class BaseRule extends Visitor {
         this.source = options.source;
         this.fileName = options.fileName;
     }
+
+    /**
+     * @param {Parameters<import('handlebars').Visitor['accept']>[0]} node
+     */
+    enter(node) {
+        this.accept(node);
+    }
 };

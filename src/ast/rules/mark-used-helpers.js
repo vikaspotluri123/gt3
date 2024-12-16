@@ -91,14 +91,13 @@ class MarkUsedHelpers extends Rule {
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
         this._textContent = '';
-        this._fileName = '';
     }
 
     /**
      * @param {Parameters<import('handlebars').Visitor['accept']>} args
      */
-    accept(...args) {
-        super.accept(...args);
+    enter(...args) {
+        super.enter(...args);
         this._analyze();
     }
 
@@ -110,7 +109,7 @@ class MarkUsedHelpers extends Rule {
             return;
         }
 
-        writeDebugFile(this._fileName, this.sourceLines);
+        writeDebugFile(this.fileName, this.sourceLines);
 
         const cheerio = require('cheerio');
         const $ = cheerio.load(this._textContent, {sourceCodeLocationInfo: true});
@@ -125,7 +124,7 @@ class MarkUsedHelpers extends Rule {
                     continue;
                 }
 
-                console.log(`${this._fileName}: "${token}"`);
+                console.log(`${this.fileName}: "${token}"`);
             }
         }
 
@@ -159,7 +158,6 @@ class MarkUsedHelpers extends Rule {
      * @type {import('handlebars').Visitor['ContentStatement']}
      */
     ContentStatement(node) {
-        this._fileName = node.loc.source;
         const text = node.value.trim();
         if (!text) {
             return;
