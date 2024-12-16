@@ -95,6 +95,7 @@ module.exports = async function readTheme(themePath, Visitor) {
     }
 
     return {
+        themePath,
         visitor: visitorContext,
         files,
         locales: await locales,
