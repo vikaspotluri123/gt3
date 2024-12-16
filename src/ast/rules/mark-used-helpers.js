@@ -42,15 +42,21 @@ function isLocSame(left, right) {
 const MARKER_REGEX = new RegExp(`${MARKER_START}[.\n]+${MARKER_END}`,'g');
 
 class MarkUsedHelpers extends Rule {
+    static createContext() {
+        return {
+            textToTranslate: new Map(),
+        };
+    }
+
     /**
-     * @param {ConstructorParameters<typeof Rule>} args
+     * @param {ConstructorParameters<typeof Rule>[0]} options
+     * @param {{textToTranslate: Map<string, SourceLocation[]>}} context
      */
-    constructor(...args) {
-        super(...args);
+    constructor(options, context) {
+        super(options, context);
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
-        /** @type {Map<string, SourceLocation[]>} */
-        this.textToTranslate = new Map();
+        this.textToTranslate = context.textToTranslate;
     }
 
     /**

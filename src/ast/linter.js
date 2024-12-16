@@ -3,17 +3,19 @@ const BaseRule = require('./rules/base');
 
 class Linter {
   /**
+   * @template TContext
    * @param {Object} options
    * @param {string} options.source - The source code to verify.
    * @param {Object} options.parsed - The parsing results.
    * @param {Object} options.parsed.ast - The ast tree to lint.
    * @param {Object} options.parsed.error - An error that happened when parsing.
    * @param {string} options.fileName - Name of the source code to identify by.
-   * @param {typeof BaseRule} options.visitor - Array of Rule class instances to use for verification.
+   * @param {typeof BaseRule<TContext>} options.visitor - Array of Rule class instances to use for verification.
+   * @param {TContext} context - Global context for the visitor.
    *
    * @returns {LintResult[]} messages - lint results.
    */
-    verify(options) {
+    verify(options, context) {
         const messages = [];
 
         function addToMessages(_message) {
@@ -36,7 +38,7 @@ class Linter {
         const visitor = new options.visitor({
             fileName: options.fileName,
             source: options.source,
-        });
+        }, context);
 
         visitor.enter(options.parsed.ast);
 

@@ -48,13 +48,15 @@ async function getHandlebarsFiles(themePath) {
  */
 module.exports = async function readTheme(themePath) {
     const files = await getHandlebarsFiles(themePath);
+    const visitor = require('./ast/rules/mark-used-helpers.js');
+    const visitorContext = visitor.createContext();
     for (const file of files) {
         const parsed = ASTLinter.parse(file.contents, file.path);
         linter.verify({
             parsed,
-            visitor: require('./ast/rules/mark-used-helpers.js'),
+            visitor,
             source: file.contents,
             fileName: file.path
-        });
+        }, visitorContext);
     }
 };

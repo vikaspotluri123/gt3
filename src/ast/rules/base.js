@@ -33,13 +33,26 @@ function wrappedVisitor(nodeName, implementation) {
     };
 }
 
+/**
+ * @abstract
+ * @template TContext
+ */
 class BaseRule extends Visitor {
+    /**
+     * @abstract
+     * Returns `TContext`, but that's not allowed in Typescript
+     */
+    static createContext() {
+        throw new Error('Not implemented');
+    }
+
    /**
     * @param {Object} options
     * @param {string} options.source - The source code to verify
     * @param {string} options.fileName - Name of the source code to identify by.
+    * @param {TContext} context
     */
-    constructor(options) {
+    constructor(options, context) {
         super();
         this.source = options.source;
         this.fileName = options.fileName;
