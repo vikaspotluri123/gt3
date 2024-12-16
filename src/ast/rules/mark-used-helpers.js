@@ -1,4 +1,5 @@
 // @ts-check
+const {LocationResolver} = require('../../util/location-resolver.js');
 const Rule = require('./base');
 
 /**
@@ -10,6 +11,9 @@ const Rule = require('./base');
 const MARKER_START = '__TT';
 const MARKER_END = '__';
 const MIN_MARKER_WIDTH = MARKER_START.length + MARKER_END.length;
+const LEADING_WHITESPACE = /^\s+/;
+const TRAILING_WHITESPACE = /\s+$/;
+const MARKER_REGEX = new RegExp(`${MARKER_START}[.\n]+${MARKER_END}`,'g');
 
 function markerOfWidth(width) {
     if (width < MIN_MARKER_WIDTH) {
@@ -38,8 +42,6 @@ function notImplemented() {
 function isLocSame(left, right) {
     return left.line === right.line && left.column === right.column;
 }
-
-const MARKER_REGEX = new RegExp(`${MARKER_START}[.\n]+${MARKER_END}`,'g');
 
 class MarkUsedHelpers extends Rule {
     static createContext() {
@@ -95,8 +97,9 @@ class MarkUsedHelpers extends Rule {
      * @param {string} text
      * @param {NonNullable<import('domhandler').Node['sourceCodeLocation']>} sourceCodeLocation
      */
-    analyzeTextBlock(text, sourceCodeLocation) {
+    analyzeTextBlock(text, {startLine, startCol}) {
         let lastIndex = 0;
+        const locationResolver = new LocationResolver(this.fileName, text, startLine, startCol);
 
         if (text.replaceAll(MARKER_REGEX, '').trim().length === 0) {
             return;
@@ -133,28 +136,48 @@ class MarkUsedHelpers extends Rule {
                 throw new Error('Unexpected state');
             }
 
-            const translationText = text.slice(textStart, textEnd);
-            console.log(`${this.fileName}: ${translationText}`);
-            const translationStore = this.textToTranslate.get(translationText) || [];
-            this.textToTranslate.set(translationText, translationStore);
-            const location = {
-                source: this.fileName,
-                start: {
-                    line: sourceCodeLocation.startLine,
-                    column: sourceCodeLocation.startCol + lastIndex,
-                },
-                end: {
-                    line: sourceCodeLocation.endLine,
-                    column: sourceCodeLocation.startCol + nextIndex,
-                }
-            };
-            translationStore.push(location);
+            this.storeText(text.slice(textStart, textEnd), textStart, textEnd, locationResolver);
+
             lastIndex = nextIndex;
 
             if (nextIndex === text.length) {
                 break;
             }
         }
+    }
+
+    /**
+     * @private
+     * @description Stores a text block for translation, calculating the location in the source code.
+     * @param {string} text the sliced text to store
+     * @param {number} startingIndex the index in the unsliced text of the first character in the sliced text
+     * @param {number} endingIndex the index in the unsliced text of the last character in the sliced text
+     * @param {LocationResolver} locationResolver the line tracker for the unsliced text
+     */
+    storeText(text, startingIndex, endingIndex, locationResolver) {
+        const leadingWhitespace = LEADING_WHITESPACE.exec(text);
+        if (leadingWhitespace !== null) {
+            text = text.slice(leadingWhitespace[0].length);
+            startingIndex += leadingWhitespace[0].length;
+        }
+
+        const trailingWhitespace = TRAILING_WHITESPACE.exec(text);
+        if (trailingWhitespace !== null) {
+            text = text.slice(0, -trailingWhitespace[0].length);
+            endingIndex -= trailingWhitespace[0].length;
+        }
+
+        // CASE: text was only whitespace, nothing to do
+        if (text.length === 0) {
+            return;
+        }
+
+        const location = locationResolver.getLocationForRange(startingIndex, endingIndex);
+
+        console.log(`${this.fileName}: ${text}`);
+        const translationStore = this.textToTranslate.get(text) || [];
+        this.textToTranslate.set(text, translationStore);
+        translationStore.push(location);
     }
 
     /**
