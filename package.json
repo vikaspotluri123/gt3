@@ -1,5 +1,9 @@
 {
 	"name": "gt3",
+	"version": "0.0.0",
+	"author": "Vikas Potluri <vikaspotluri123.github@gmail.com?",
+	"repository": "git@github.com:vikaspotluri123/gt3",
+	"license": "MIT",
 	"type": "commonjs",
 	"bin": "./bin/gt3",
 	"scripts": {
