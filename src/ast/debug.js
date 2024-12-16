@@ -1,3 +1,12 @@
+// @ts-check
+
+/**
+ * @typedef {{sourceLines: string[]; originalSourceLines: string[]}} MinimalRule
+ * @typedef {Parameters<import('handlebars').Visitor['BlockStatement']>[0]['loc']} SourceLocation
+ * @typedef {SourceLocation['start']} Position
+ * @typedef {{loc: SourceLocation}} MinimalLocation
+ */
+
 function writeDebugFile(fileName, contents) {
     const fs = require('fs');
     const path = require('path');
@@ -12,24 +21,26 @@ let debugOriginalSource = false;
 
 /**
  * Serializes a location based on `sourceLines`
- * @param {MarkUsedHelpers} instance the current rule
- * @param {Parameters<import('handlebars').Visitor['accept']>[0] | Position} nodeOrStart either a node or a start position
+ * @param {MinimalRule | string[]} instance the current rule, or an array of lines
+ * @param {MinimalLocation | Position} nodeOrStart either a node or a start position
  * @param {Position} [end] When provided, assumes that `nodeOrStart` is a start position
  * @example `debugGetSource(rule, node)`
  * @example `debugGetSource(rule, nodeA.loc.start, nodeB.loc.end)`
  */
 function debugGetSource(instance, nodeOrStart, end) {
-    /** @type {Parameters<import('handlebars').Visitor['accept']>[0]} */
+    /** @type {MinimalLocation} */
     let node;
     if (end) {
-        // @ts-ignore this is a debug function, we don't strictly type check
-        node = {loc: {start: nodeOrStart, end}};
+        /** @type {Position} */
+        // @ts-expect-error this is a debug function, we don't strictly type check
+        const start = nodeOrStart;
+        node = {loc: {source: '', start, end}};
     } else {
-        // @ts-ignore this is a debug function, we don't strictly type check
+        // @ts-expect-error this is a debug function, we don't strictly type check
         node = nodeOrStart;
     }
 
-    const lineStore = debugOriginalSource ? instance.originalSourceLines : instance.sourceLines;
+    const lineStore = Array.isArray(instance) ? instance : debugOriginalSource ? instance.originalSourceLines : instance.sourceLines;
     const lines = lineStore.slice(node.loc.start.line - 1, node.loc.end.line);
     // Process the ending line first so the index doesn't need to be normalized
     lines[lines.length - 1] = lines[lines.length - 1].slice(0, node.loc.end.column);
