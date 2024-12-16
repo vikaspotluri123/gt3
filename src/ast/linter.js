@@ -3,26 +3,6 @@ const Handlebars = require('handlebars');
 class Linter {
     /**
      *
-     * @param {Object} [options]
-     * @param {string[]?} options.partials - list of known theme partial names in ['mypartial', 'logo'] format
-     * @param {string[]?} options.helpers - list of registered theme helper names in ['is', 'has'] format
-     * @param {string[]?} options.inlinePartials - list of known local partial names in ['mypartial', 'logo'] format
-     * @param {Object?} options.customThemeSettings - list of registered custom theme settings in {'main_accent':{}} format
-     */
-    constructor(options = {partials: [], helpers: [], inlinePartials: [], customThemeSettings: {}}) {
-        this.options = options;
-        // Ignore OS-specific path separator as Handlebars only uses forward-separators in its syntax
-        this.options.partials = this.options.partials.map(partial => partial.replaceAll(/\\/g, '/'));
-
-        this.partials = [];
-        this.helpers = [];
-        this.inlinePartials = [];
-        this.customThemeSettings = [];
-        this.usedPageProperties = [];
-    }
-
-    /**
-     *
      * @param {Object} config
      * @param {Object[]} config.rules - instances of AST Rule classes
      * @param {Function} config.log - rule check reporting log function
@@ -39,10 +19,6 @@ class Linter {
                 name: ruleName,
                 log: config.log,
                 source: config.source,
-                partials: this.options.partials,
-                helpers: this.options.helpers,
-                inlinePartials: this.options.inlinePartials,
-                customThemeSettings: this.options.customThemeSettings
             });
 
             nodeHandlers.push({
@@ -53,11 +29,6 @@ class Linter {
 
         function Scanner() {
             this.context = {
-                partials: [],
-                helpers: [],
-                inlinePartials: [],
-                customThemeSettings: [],
-                usedPageProperties: [],
                 cleanupHandlers: [],
             };
         }
@@ -147,29 +118,6 @@ class Linter {
         }
 
         scanner.accept(options.parsed.ast);
-
-        if (scanner.context.partials) {
-            this.partials = scanner.context.partials;
-        }
-
-        if (scanner.context.helpers) {
-            this.helpers = scanner.context.helpers.map(p => ({
-                name: p.node,
-                helperType: p.helperType
-            }));
-        }
-
-        if (scanner.context.customThemeSettings) {
-            this.customThemeSettings = scanner.context.customThemeSettings;
-        }
-
-        if (scanner.context.inlinePartials) {
-            this.inlinePartials = scanner.context.inlinePartials;
-        }
-
-        if (scanner.context.usedPageProperties) {
-            this.usedPageProperties = scanner.context.usedPageProperties;
-        }
 
         for (const cleanupHandler of scanner.context.cleanupHandlers) {
             cleanupHandler();

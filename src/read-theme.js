@@ -14,10 +14,7 @@ const ignore = [
     '.yarn-cache'
 ];
 
-const linter = new ASTLinter({
-    partials: [],
-    helpers: [],
-});
+const linter = new ASTLinter();
 
 /**
  * @param {import('fs').Dirent} dirent
@@ -115,12 +112,6 @@ const processHelpers = function (theme, themeFile) {
         source: themeFile.content,
         moduleId: themeFile.file
     });
-    for (const helper of linter.helpers) {
-        if (!theme.helpers[helper.name]) {
-            theme.helpers[helper.name] = [];
-        }
-        theme.helpers[helper.name].push(themeFile.file);
-    }
 };
 
 /**
