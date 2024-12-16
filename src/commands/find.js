@@ -4,7 +4,7 @@ const fs = require('node:fs/promises');
 
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
- * @typedef {'update' | 'fail' | 'json' | 'verbose'} Flag
+ * @typedef {'update' | 'fail' | 'json' | 'verbose' | 'specialCharacters'} Flag
  * @typedef {never} Parameter
  * @typedef {Record<Flag, boolean> & Record<Parameter, string>} Options
  *
@@ -15,16 +15,30 @@ const fs = require('node:fs/promises');
  * @typedef {Record<string, Array<UpdateItem>>} ChangesPerFile
  */
 
+const LETTER_REGEX = /[\p{L}]/gu;
+
+/**
+ * @param {string} text
+ */
+function isSpecialCharactersOnly(text) {
+  return text.match(LETTER_REGEX) === null;
+}
+
 /**
  * @param {ParsedTheme['visitor']['textToTranslate']} textToTranslate
+ * @param {boolean} includeSpecialCharacters
  */
-function prepareTranslationTextForUpdate(textToTranslate) {
+function prepareTranslationTextForUpdate (textToTranslate, includeSpecialCharacters) {
   /**
    * @type {ChangesPerFile}
    */
   const changesPerFile = {};
 
   for (const [token, sources] of textToTranslate.entries()) {
+    if (!includeSpecialCharacters && isSpecialCharactersOnly(token)) {
+      continue;
+    }
+
     for (const location of sources) {
       const store = changesPerFile[location.source] ??= [];
       store.push({text: token, location});
@@ -122,7 +136,7 @@ async function applyThemeChanges(theme, changesPerFile, verbose) {
  * @param {ParsedTheme} theme
  */
 function findCommand(options, theme) {
-  const {update, fail, json, verbose} = options;
+  const {update, fail, json, verbose, specialCharacters} = options;
 
   if (update && fail) {
     console.error('Error: Cannot use --update and --fail together');
@@ -130,7 +144,7 @@ function findCommand(options, theme) {
   }
 
   if (update) {
-    const changes = prepareTranslationTextForUpdate(theme.visitor.textToTranslate);
+    const changes = prepareTranslationTextForUpdate(theme.visitor.textToTranslate, specialCharacters);
     return applyThemeChanges(theme, changes, verbose);
   }
 
@@ -138,11 +152,19 @@ function findCommand(options, theme) {
   const {textToTranslate} = theme.visitor;
 
   if (json) {
-    const missingTranslations = Array.from(textToTranslate.keys());
+    let missingTranslations = Array.from(textToTranslate.keys());
+    if (!specialCharacters) {
+      missingTranslations = missingTranslations.filter(text => !isSpecialCharactersOnly(text));
+    }
+
     console.log(JSON.stringify(missingTranslations, null, 2));
   } else {
-    for (const [token, sources] of textToTranslate.entries()) {
-      console.log(`"${token}"`);
+    for (const [text, sources] of textToTranslate.entries()) {
+      if (!specialCharacters && isSpecialCharactersOnly(text)) {
+        continue;
+      }
+
+      console.log(`"${text}"`);
       if (!verbose) {
         continue;
       }

@@ -23,7 +23,7 @@ Commands:
   help : Print his help message
 
   find <path-to-theme> : Finds untranslated strings
-    --update: Automatically wrap untranslated strings
+    --special-characters: Consider strings of only special characters as untranslated
     --fail: Exit with a non-zero exit code if any untranslated strings are found. Cannot be used with --update
     --json: Output the results in JSON format
     --verbose: Include file name and line number in the output
@@ -46,7 +46,7 @@ const commands = {
   },
   find: {
     /** @type {import('./src/commands/find.js').Flag[]} */
-    flags: ['update', 'fail', 'json', 'verbose'],
+    flags: ['update', 'fail', 'json', 'verbose', 'specialCharacters'],
     run: deferredCommand('./src/commands/find.js', 'findCommand'),
   },
   status: {
