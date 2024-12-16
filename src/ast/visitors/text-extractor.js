@@ -30,10 +30,12 @@ function markerOfWidth(width) {
 }
 
 /**
+ * @param {Node} node
  * @returns {never}
  */
-function notImplemented() {
+function notImplemented(node) {
     debugger;
+    node;
     throw new Error('Not implemented');
 }
 
@@ -196,7 +198,7 @@ class TextExtractorVisitor extends BaseVisitor {
     Decorator = notImplemented;
     MustacheStatement = this.markSourceVisitor.bind(this);
     CommentStatement = this.markSourceVisitor.bind(this);
-    SubExpression = notImplemented;
+    SubExpression = this.markSourceVisitor.bind(this);
 
     /**
      * @type {Visitor['BlockStatement']}
