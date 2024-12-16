@@ -41,10 +41,38 @@ async function getHandlebarsFiles(themePath) {
 }
 
 /**
+ * @param {string} themePath
+ */
+async function getLocales(themePath) {
+    const localesPath = path.join(themePath, 'locales');
+    /** @type {Record<string, Record<string, string>>} */
+    const locales = {};
+
+    if (!await fs.stat(localesPath).then(stat => stat.isDirectory(), () => false)) {
+        return locales;
+    }
+
+    const promises = [];
+
+    for await (const file of fs.glob(`${localesPath}/*.json`)) {
+        const locale = path.parse(file).name;
+        promises.push(
+            fs.readFile(file, 'utf8').then(contents => {
+                locales[locale] = JSON.parse(contents);
+            }),
+        );
+    }
+
+    await Promise.all(promises);
+    return locales;
+}
+
+/**
  * @param {string} themePath - path to the validated theme
  * @param {typeof import('./ast/visitors/base.js').BaseVisitor} Visitor
  */
 module.exports = async function readTheme(themePath, Visitor) {
+    const locales = getLocales(themePath)
     const files = await getHandlebarsFiles(themePath);
     const visitorContext = Visitor.createContext();
     for (const file of files) {
@@ -52,7 +80,7 @@ module.exports = async function readTheme(themePath, Visitor) {
 
         try {
             ast = parseWithoutProcessing(file.contents, {srcName: file.path});
-        } catch {
+        } catch (error) {
             // TODO: handle error
             continue;
         }
@@ -64,5 +92,6 @@ module.exports = async function readTheme(themePath, Visitor) {
     return {
         visitor: visitorContext,
         files,
-    }
+        locales: await locales,
+    };
 };
