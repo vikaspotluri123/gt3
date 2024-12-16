@@ -1,26 +1,26 @@
 {
-	"name": "gt3",
-	"version": "0.0.0",
-	"author": "Vikas Potluri <vikaspotluri123.github@gmail.com?",
-	"repository": "git@github.com:vikaspotluri123/gt3",
-	"license": "MIT",
-	"type": "commonjs",
-	"bin": "./bin/gt3",
-	"scripts": {
-		"lint": "biome lint",
-		"format": "biome format"
-	},
-	"engines": {
-		"node": "^22.11.0"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"@types/minimist": "^1.2.5",
-		"@types/node": "^22.10.1"
-	},
-	"dependencies": {
-		"cheerio": "^1.0.0",
-		"handlebars": "^4.7.8",
-		"minimist": "*"
-	}
+  "name": "gt3",
+  "version": "0.0.1",
+  "author": "Vikas Potluri <vikaspotluri123.github@gmail.com?",
+  "repository": "git@github.com:vikaspotluri123/gt3",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": "./bin/gt3",
+  "scripts": {
+    "lint": "biome lint",
+    "format": "biome format"
+  },
+  "engines": {
+    "node": "^22.11.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^22.10.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "handlebars": "^4.7.8",
+    "minimist": "*"
+  }
 }
