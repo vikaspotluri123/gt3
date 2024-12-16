@@ -65,12 +65,12 @@ const commands = {
 	},
 	find: {
 		flags: findFlags,
-		run: deferredCommand('./src/commands/find.js', 'findCommand'),
+		run: deferredCommand('../src/commands/find.js', 'findCommand'),
 	},
 	status: {
 		flags: statusFlags,
 		parameters: statusParameters,
-		run: deferredCommand('./src/commands/status.js', 'statusCommand'),
+		run: deferredCommand('../src/commands/status.js', 'statusCommand'),
 	},
 	ci: {
 		flags: [...findFlags, ...statusFlags],
