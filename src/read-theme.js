@@ -2,6 +2,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {parseWithoutProcessing} = require('handlebars');
+const {parseJson} = require('./util/inline-json.js');
 
 /**
  * @typedef {import('./types.js').ParsedTheme} ParsedTheme
@@ -70,7 +71,7 @@ async function getLocales(themePath) {
 		const locale = path.parse(file).name;
 		promises.push(
 			fs.readFile(file, 'utf8').then((contents) => {
-				locales[locale] = JSON.parse(contents);
+				locales[locale] = parseJson(contents);
 			}),
 		);
 	}
