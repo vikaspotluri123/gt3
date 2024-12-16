@@ -1,6 +1,7 @@
 // @ts-check
 const fs = require('fs/promises');
 const path = require('path');
+const {parseWithoutProcessing} = require('handlebars')
 
 /**
  * @param {import('fs').Dirent} dirent
@@ -51,7 +52,7 @@ module.exports = async function readTheme(themePath) {
         let ast;
 
         try {
-            ast = Handlebars.parseWithoutProcessing(file.contents, {srcName: file.path});
+            ast = parseWithoutProcessing(file.contents, {srcName: file.path});
         } catch {
             // TODO: handle error
             continue;
