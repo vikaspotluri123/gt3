@@ -106,11 +106,9 @@ const readFiles = function readFiles(theme) {
 const processHelpers = function (theme, themeFile) {
     linter.verify({
         parsed: themeFile.parsed,
-        rules: [
-            require('./ast/rules/mark-used-helpers.js'),
-        ],
+        visitor: require('./ast/rules/mark-used-helpers.js'),
         source: themeFile.content,
-        moduleId: themeFile.file
+        fileName: themeFile.file
     });
 };
 

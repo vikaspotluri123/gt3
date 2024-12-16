@@ -3,20 +3,14 @@
 const {Visitor} = require('handlebars');
 
 module.exports = class BaseRule extends Visitor {
+   /**
+    * @param {Object} options
+    * @param {string} options.source - The source code to verify
+    * @param {string} options.fileName - Name of the source code to identify by.
+    */
     constructor(options) {
         super();
-        this.ruleName = options.name;
-        this._log = options.log;
         this.source = options.source;
-    }
-
-    log(result) {
-        const defaults = {
-            rule: this.ruleName
-        };
-
-        const reportedResult = Object.assign({}, defaults, result);
-
-        this._log(reportedResult);
+        this.fileName = options.fileName;
     }
 };

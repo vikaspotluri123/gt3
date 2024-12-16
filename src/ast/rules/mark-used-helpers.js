@@ -1,6 +1,5 @@
 // @ts-check
 const Rule = require('./base');
-const {getNodeName, classifyNode, transformLiteralToPath} = require('../helpers');
 
 /**
  * @typedef {Parameters<import('handlebars').Visitor['Program']>[0]} Program
@@ -84,12 +83,23 @@ function isLocSame(left, right) {
 }
 
 class MarkUsedHelpers extends Rule {
+    /**
+     * @param {ConstructorParameters<typeof Rule>} args
+     */
     constructor(...args) {
         super(...args);
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
         this._textContent = '';
         this._fileName = '';
+    }
+
+    /**
+     * @param {Parameters<import('handlebars').Visitor['accept']>} args
+     */
+    accept(...args) {
+        super.accept(...args);
+        this._analyze();
     }
 
     /**
@@ -134,15 +144,6 @@ class MarkUsedHelpers extends Rule {
         //         return;
         //     }
         // });
-    }
-
-    set scanner (scanner) {
-        this._scanner = scanner;
-        scanner.context.cleanupHandlers.push(this._analyze.bind(this));
-    }
-
-    get scanner () {
-        return this._scanner;
     }
 
     /**
