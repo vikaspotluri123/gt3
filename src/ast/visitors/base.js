@@ -75,3 +75,4 @@ class BaseVisitor extends Visitor {
 };
 
 module.exports.BaseVisitor = BaseVisitor;
+module.exports.VISITOR_METHODS = VISITOR_METHODS;
