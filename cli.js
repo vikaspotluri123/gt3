@@ -10,7 +10,14 @@ if (argv.length !== 3) {
 async function run () {
   const themePath = argv[2];
   const readTheme = require('./src/read-theme.js');
-  /* console.dir */(await readTheme(themePath));
+  const {multiVisitor} = require('./src/ast/visitors/many.js');
+  const visitors = [
+      require('./src/ast/visitors/translated-strings.js').TranslatedStringsVisitor,
+      require('./src/ast/visitors/text-extractor.js'),
+  ];
+
+  const Visitor = multiVisitor(visitors);
+  const context = await readTheme(themePath, Visitor);
 }
 
 run().catch(error => {

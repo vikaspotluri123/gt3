@@ -1,7 +1,7 @@
 // @ts-check
 const fs = require('fs/promises');
 const path = require('path');
-const {parseWithoutProcessing} = require('handlebars')
+const {parseWithoutProcessing} = require('handlebars');
 
 /**
  * @param {import('fs').Dirent} dirent
@@ -41,12 +41,11 @@ async function getHandlebarsFiles(themePath) {
 }
 
 /**
- *
  * @param {string} themePath - path to the validated theme
+ * @param {typeof import('./ast/visitors/base.js').BaseVisitor} Visitor
  */
-module.exports = async function readTheme(themePath) {
+module.exports = async function readTheme(themePath, Visitor) {
     const files = await getHandlebarsFiles(themePath);
-    const Visitor = require('./ast/visitors/text-extractor.js');
     const visitorContext = Visitor.createContext();
     for (const file of files) {
         let ast;
@@ -60,5 +59,10 @@ module.exports = async function readTheme(themePath) {
 
         const visitor = new Visitor({source: file.contents, fileName: file.path}, visitorContext);
         visitor.enter(ast);
+    }
+
+    return {
+        visitor: visitorContext,
+        files,
     }
 };
