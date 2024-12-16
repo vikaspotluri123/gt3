@@ -11,7 +11,7 @@ const {parseWithoutProcessing} = require('handlebars');
  * @param {import('fs').Dirent} dirent
  */
 function isIgnoredDirent(dirent) {
-    return dirent.isDirectory();
+	return dirent.isDirectory();
 }
 
 /**
@@ -19,56 +19,65 @@ function isIgnoredDirent(dirent) {
  * @returns {Promise<Array<{path: string, contents: string}>>}
  */
 async function getHandlebarsFiles(themePath) {
-    themePath = path.join(themePath, '.');
-    const response = [];
-    const promises = [];
+	themePath = path.join(themePath, '.');
+	const response = [];
+	const promises = [];
 
-    for await (const file of fs.glob(`${themePath}/**/*.hbs`, {withFileTypes: true})) {
-        // TODO: when passed to `fs.glob#options.exclude`, the file name is passed instead of the dirent.
-        // To work around this, we manually run the filter function in the loop
-        if (isIgnoredDirent(file)) {
-            continue;
-        }
+	for await (const file of fs.glob(`${themePath}/**/*.hbs`, {
+		withFileTypes: true,
+	})) {
+		// TODO: when passed to `fs.glob#options.exclude`, the file name is passed instead of the dirent.
+		// To work around this, we manually run the filter function in the loop
+		if (isIgnoredDirent(file)) {
+			continue;
+		}
 
-        const fileName = path.relative(themePath, path.join(file.parentPath, file.name));
+		const fileName = path.relative(themePath, path.join(file.parentPath, file.name));
 
-        promises.push(fs.readFile(path.join(themePath, fileName), 'utf8').then(contents => {
-            response.push({
-                path: fileName,
-                contents,
-            });
-        }));
-    }
+		promises.push(
+			fs.readFile(path.join(themePath, fileName), 'utf8').then((contents) => {
+				response.push({
+					path: fileName,
+					contents,
+				});
+			}),
+		);
+	}
 
-    await Promise.all(promises);
-    return response;
+	await Promise.all(promises);
+	return response;
 }
 
 /**
  * @param {string} themePath
  */
 async function getLocales(themePath) {
-    const localesPath = path.join(themePath, 'locales');
-    /** @type {Record<string, Record<string, string>>} */
-    const locales = {};
+	const localesPath = path.join(themePath, 'locales');
+	/** @type {Record<string, Record<string, string>>} */
+	const locales = {};
 
-    if (!await fs.stat(localesPath).then(stat => stat.isDirectory(), () => false)) {
-        return locales;
-    }
+	if (
+		!(await fs.stat(localesPath).then(
+			(stat) => stat.isDirectory(),
+			() => false,
+		))
+	) {
+		return locales;
+	}
 
-    const promises = [];
+	const promises = [];
 
-    for await (const file of fs.glob(`${localesPath}/*.json`)) {
-        const locale = path.parse(file).name;
-        promises.push(
-            fs.readFile(file, 'utf8').then(contents => {
-                locales[locale] = JSON.parse(contents);
-            }),
-        );
-    }
+	for await (const file of fs.glob(`${localesPath}/*.json`)) {
+		const locale = path.parse(file).name;
+		promises.push(
+			fs.readFile(file, 'utf8').then((contents) => {
+				locales[locale] = JSON.parse(contents);
+			}),
+		);
+	}
 
-    await Promise.all(promises);
-    return locales;
+	await Promise.all(promises);
+	return locales;
 }
 
 /**
@@ -77,27 +86,27 @@ async function getLocales(themePath) {
  * @returns {Promise<ParsedTheme>}
  */
 module.exports = async function readTheme(themePath, Visitor) {
-    const locales = getLocales(themePath)
-    const files = await getHandlebarsFiles(themePath);
-    const visitorContext = Visitor.createContext();
-    for (const file of files) {
-        let ast;
+	const locales = getLocales(themePath);
+	const files = await getHandlebarsFiles(themePath);
+	const visitorContext = Visitor.createContext();
+	for (const file of files) {
+		let ast;
 
-        try {
-            ast = parseWithoutProcessing(file.contents, {srcName: file.path});
-        } catch (error) {
-            // TODO: handle error
-            continue;
-        }
+		try {
+			ast = parseWithoutProcessing(file.contents, {srcName: file.path});
+		} catch (error) {
+			// TODO: handle error
+			continue;
+		}
 
-        const visitor = new Visitor({source: file.contents, fileName: file.path}, visitorContext);
-        visitor.enter(ast);
-    }
+		const visitor = new Visitor({source: file.contents, fileName: file.path}, visitorContext);
+		visitor.enter(ast);
+	}
 
-    return {
-        themePath,
-        visitor: visitorContext,
-        files,
-        locales: await locales,
-    };
+	return {
+		themePath,
+		visitor: visitorContext,
+		files,
+		locales: await locales,
+	};
 };

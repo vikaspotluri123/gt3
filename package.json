@@ -1,14 +1,20 @@
 {
-  "type": "commonjs",
-  "engines": {
-    "node": "^22.11.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.1"
-  },
-  "dependencies": {
-    "cheerio": "^1.0.0",
-    "handlebars": "^4.7.8",
-    "minimist": "*"
-  }
+	"name": "gt3",
+	"type": "commonjs",
+	"scripts": {
+		"lint": "biome lint",
+		"format": "biome format"
+	},
+	"engines": {
+		"node": "^22.11.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/node": "^22.10.1"
+	},
+	"dependencies": {
+		"cheerio": "^1.0.0",
+		"handlebars": "^4.7.8",
+		"minimist": "*"
+	}
 }

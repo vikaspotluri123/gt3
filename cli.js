@@ -14,7 +14,6 @@ require('./src/commands/_internal/suppress-warnings.js');
  }} CommandDefinition
  */
 
-
 const help = `
 GT3 - The Ghost Theme Translation Toolkit
 
@@ -44,7 +43,7 @@ Commands:
  * @returns {CommandDefinition['run']}
  */
 function deferredCommand(importPath, exportName) {
-  return (args, theme) => import(importPath).then(m => m[exportName](args, theme));
+	return (args, theme) => import(importPath).then((m) => m[exportName](args, theme));
 }
 
 /** @type {import('./src/commands/find.js').Flag[]} */
@@ -58,96 +57,95 @@ const statusParameters = ['base-lang'];
  * @satisfies {Record<string, CommandDefinition>}
  */
 const commands = {
-  help: {
-    run: () => {
-      console.log(help);
-      return 0;
-    },
-  },
-  find: {
-    flags: findFlags,
-    run: deferredCommand('./src/commands/find.js', 'findCommand'),
-  },
-  status: {
-    flags: statusFlags,
-    parameters: statusParameters,
-    run: deferredCommand('./src/commands/status.js', 'statusCommand'),
-  },
-  ci: {
-    flags: [...findFlags, ...statusFlags],
-    parameters: statusParameters,
-    async run(options, theme) {
-      options.fail = true;
-      options.update = false;
-      const [findResult, statusResult] = await Promise.all([
-        commands.find.run(options, theme),
-        commands.status.run(options, theme),
-      ]);
+	help: {
+		run: () => {
+			console.log(help);
+			return 0;
+		},
+	},
+	find: {
+		flags: findFlags,
+		run: deferredCommand('./src/commands/find.js', 'findCommand'),
+	},
+	status: {
+		flags: statusFlags,
+		parameters: statusParameters,
+		run: deferredCommand('./src/commands/status.js', 'statusCommand'),
+	},
+	ci: {
+		flags: [...findFlags, ...statusFlags],
+		parameters: statusParameters,
+		async run(options, theme) {
+			options.fail = true;
+			options.update = false;
+			const [findResult, statusResult] = await Promise.all([
+				commands.find.run(options, theme),
+				commands.status.run(options, theme),
+			]);
 
-      return findResult + statusResult;
-    },
-  }
+			return findResult + statusResult;
+		},
+	},
 };
 
 if (argv.length < 4) {
-  console.log(help);
+	console.log(help);
 
-  if (argv.length === 3 && argv[2] !== 'help') {
-    console.error('Error: Missing theme path');
-  }
+	if (argv.length === 3 && argv[2] !== 'help') {
+		console.error('Error: Missing theme path');
+	}
 
-  exit(1);
+	exit(1);
 }
-
 
 function parseCommand() {
-  const commandName = argv[2];
-  const themePath = argv[3];
+	const commandName = argv[2];
+	const themePath = argv[3];
 
-  if (commandName === 'help') {
-    commands.help.run();
-    exit(0);
-  }
+	if (commandName === 'help') {
+		commands.help.run();
+		exit(0);
+	}
 
-  /** @type {CommandDefinition} */
-  const command = commands[argv[2]];
-  if (!command) {
-    console.error(`Unknown command: ${argv[2]}`);
-    console.error(help);
-    exit(1);
-  }
+	/** @type {CommandDefinition} */
+	const command = commands[argv[2]];
+	if (!command) {
+		console.error(`Unknown command: ${argv[2]}`);
+		console.error(help);
+		exit(1);
+	}
 
-  const minimist = require('minimist');
-  const args = minimist(argv.slice(3));
-  const flags = command.flags ?? [];
-  const parameters = command.parameters ?? [];
+	const minimist = require('minimist');
+	const args = minimist(argv.slice(3));
+	const flags = command.flags ?? [];
+	const parameters = command.parameters ?? [];
 
-  require('./src/commands/_internal/check-flags.js').checkFlags(args, flags, parameters);
+	require('./src/commands/_internal/check-flags.js').checkFlags(args, flags, parameters);
 
-  return {
-    args,
-    themePath,
-    command: command.run,
-  };
+	return {
+		args,
+		themePath,
+		command: command.run,
+	};
 }
 
-async function run () {
-  const {themePath, args, command} = parseCommand();
-  const readTheme = require('./src/read-theme.js');
-  const {multiVisitor} = require('./src/ast/visitors/many.js');
-  const visitors = [
-      require('./src/ast/visitors/translated-strings.js').TranslatedStringsVisitor,
-      require('./src/ast/visitors/text-extractor.js'),
-  ];
+async function run() {
+	const {themePath, args, command} = parseCommand();
+	const readTheme = require('./src/read-theme.js');
+	const {multiVisitor} = require('./src/ast/visitors/many.js');
+	const visitors = [
+		require('./src/ast/visitors/translated-strings.js').TranslatedStringsVisitor,
+		require('./src/ast/visitors/text-extractor.js'),
+	];
 
-  const Visitor = multiVisitor(visitors);
-  const context = await readTheme(themePath, Visitor);
+	const Visitor = multiVisitor(visitors);
+	const context = await readTheme(themePath, Visitor);
 
-  const exitCode = await command(args, context);
-  exit(exitCode ?? 0);
+	const exitCode = await command(args, context);
+	exit(exitCode ?? 0);
 }
 
-run().catch(error => {
-  console.error(error);
-  exit(1);
+run().catch((error) => {
+	console.error(error);
+	exit(1);
 });
