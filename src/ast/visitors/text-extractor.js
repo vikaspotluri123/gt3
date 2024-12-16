@@ -175,7 +175,6 @@ class TextExtractorVisitor extends BaseVisitor {
 
         const location = locationResolver.getLocationForRange(startingIndex, endingIndex);
 
-        console.log(`${this.fileName}: ${text}`);
         const translationStore = this.textToTranslate.get(text) || [];
         this.textToTranslate.set(text, translationStore);
         translationStore.push(location);

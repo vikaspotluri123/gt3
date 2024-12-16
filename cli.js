@@ -33,6 +33,9 @@ Commands:
     --base-locale=<locale>: Use this locale as the fully translated reference instead of reading the theme
 `.trimStart();
 
+function deferredCommand(importPath, exportName) {
+  return (args, theme) => import(importPath).then(m => m[exportName](args, theme));
+}
 
 /**
  * @satisfies {Record<string, CommandDefinition>}
@@ -42,10 +45,9 @@ const commands = {
     run: () => console.log(help),
   },
   find: {
+    /** @type {import('./src/commands/find.js').Flag[]} */
     flags: ['update', 'fail', 'json', 'verbose'],
-    run() {
-      throw new Error('not implemented');
-    },
+    run: deferredCommand('./src/commands/find.js', 'findCommand'),
   },
   status: {
     flags: ['all'],
