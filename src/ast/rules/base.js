@@ -2,7 +2,38 @@
 
 const {Visitor} = require('handlebars');
 
-module.exports = class BaseRule extends Visitor {
+const VISITOR_METHODS = [
+    'Program',
+    'BlockStatement',
+    'PartialStatement',
+    'PartialBlockStatement',
+    'DecoratorBlock',
+    'Decorator',
+    'MustacheStatement',
+    'ContentStatement',
+    'CommentStatement',
+    'SubExpression',
+    'PathExpression',
+    'StringLiteral',
+    'NumberLiteral',
+    'BooleanLiteral',
+    'UndefinedLiteral',
+    'NullLiteral',
+    'Hash',
+];
+
+/**
+ * @param {string} nodeName
+ * @param {Function} implementation
+ */
+function wrappedVisitor(nodeName, implementation) {
+    return function (...args) {
+        Visitor.prototype[nodeName].apply(this, args);
+        return implementation.apply(this, args);
+    };
+}
+
+class BaseRule extends Visitor {
    /**
     * @param {Object} options
     * @param {string} options.source - The source code to verify
@@ -12,6 +43,10 @@ module.exports = class BaseRule extends Visitor {
         super();
         this.source = options.source;
         this.fileName = options.fileName;
+
+        for (const method of VISITOR_METHODS) {
+            this[method] = wrappedVisitor(method, this[method]);
+        }
     }
 
     /**
@@ -21,3 +56,5 @@ module.exports = class BaseRule extends Visitor {
         this.accept(node);
     }
 };
+
+module.exports = BaseRule;
