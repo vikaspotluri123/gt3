@@ -1,9 +1,6 @@
 // @ts-check
 const fs = require('fs/promises');
 const path = require('path');
-const ASTLinter = require('./ast');
-
-const linter = new ASTLinter();
 
 /**
  * @param {import('fs').Dirent} dirent
@@ -48,15 +45,19 @@ async function getHandlebarsFiles(themePath) {
  */
 module.exports = async function readTheme(themePath) {
     const files = await getHandlebarsFiles(themePath);
-    const visitor = require('./ast/visitors/text-extractor.js');
-    const visitorContext = visitor.createContext();
+    const Visitor = require('./ast/visitors/text-extractor.js');
+    const visitorContext = Visitor.createContext();
     for (const file of files) {
-        const parsed = ASTLinter.parse(file.contents, file.path);
-        linter.verify({
-            parsed,
-            visitor,
-            source: file.contents,
-            fileName: file.path
-        }, visitorContext);
+        let ast;
+
+        try {
+            ast = Handlebars.parseWithoutProcessing(file.contents, {srcName: file.path});
+        } catch {
+            // TODO: handle error
+            continue;
+        }
+
+        const visitor = new Visitor({source: file.contents, fileName: file.path}, visitorContext);
+        visitor.enter(ast);
     }
 };
