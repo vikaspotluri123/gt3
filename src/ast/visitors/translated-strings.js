@@ -9,6 +9,7 @@ const {BaseVisitor} = require('./base');
  * @typedef {import('../types.js').PathExpression} PathExpression
  * @typedef {import('../types.js').StringLiteral} StringLiteral
  * @typedef {import('../types.js').SourceLocation} SourceLocation
+ * @typedef {import('../../types.js').ParsedTheme['visitor']} VisitorContext
  */
 
 /**
@@ -50,7 +51,7 @@ class TranslatedStringsVisitor extends BaseVisitor {
 
   /**
    * @param {Object} options
-   * @param {{translatedStrings: Map<string, TranslatedString>}} context
+   * @param {Pick<VisitorContext, 'translatedStrings'>} context
    */
   constructor(options, context) {
     super(options, context);

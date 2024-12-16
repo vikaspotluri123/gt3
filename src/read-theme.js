@@ -4,6 +4,10 @@ const path = require('path');
 const {parseWithoutProcessing} = require('handlebars');
 
 /**
+ * @typedef {import('./types.js').ParsedTheme} ParsedTheme
+ */
+
+/**
  * @param {import('fs').Dirent} dirent
  */
 function isIgnoredDirent(dirent) {
@@ -70,6 +74,7 @@ async function getLocales(themePath) {
 /**
  * @param {string} themePath - path to the validated theme
  * @param {typeof import('./ast/visitors/base.js').BaseVisitor} Visitor
+ * @returns {Promise<ParsedTheme>}
  */
 module.exports = async function readTheme(themePath, Visitor) {
     const locales = getLocales(themePath)

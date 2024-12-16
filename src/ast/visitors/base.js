@@ -44,7 +44,7 @@ function wrappedVisitor(nodeName, implementation) {
 class BaseVisitor extends Visitor {
     /**
      * @abstract
-     * Returns `TContext`, but that's not allowed in Typescript
+     * @returns {any} actually returns `TContext`, but that's not allowed in Typescript
      */
     static createContext() {
         throw new Error('Not implemented');

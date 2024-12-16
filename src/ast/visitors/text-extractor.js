@@ -7,6 +7,7 @@ const {BaseVisitor} = require('./base.js');
  * @typedef {import('../types.js').Visitor} Visitor
  * @typedef {import('../types.js').SourceLocation} SourceLocation
  * @typedef {import('../types.js').Node} Node
+ * @typedef {import('../../types.js').ParsedTheme['visitor']} VisitorContext
  */
 
 
@@ -56,7 +57,7 @@ class TextExtractorVisitor extends BaseVisitor {
 
     /**
      * @param {ConstructorParameters<typeof BaseVisitor>[0]} options
-     * @param {{textToTranslate: Map<string, SourceLocation[]>}} context
+     * @param {Pick<VisitorContext, 'textToTranslate'>} context
      */
     constructor(options, context) {
         super(options, context);
