@@ -11,6 +11,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"@types/minimist": "^1.2.5",
 		"@types/node": "^22.10.1"
 	},
 	"dependencies": {
