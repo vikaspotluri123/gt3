@@ -132,10 +132,39 @@ async function applyThemeChanges(theme, changesPerFile, verbose) {
 }
 
 /**
+ * @param {ParsedTheme} theme
+ * @param {boolean} specialCharacters
+ * @param {boolean} verbose
+ */
+async function applyLocaleChanges(theme, specialCharacters, verbose) {
+	const missing = [];
+	const extra = [];
+
+	for (const token of theme.visitor.textToTranslate.keys()) {
+		if (!specialCharacters && isSpecialCharactersOnly(token)) {
+			continue;
+		}
+
+		missing.push(token);
+	}
+
+	/** @type {import('./_internal/update-locales.js').JsonChanges} */
+	const changes = {};
+
+	for (const locale of Object.keys(theme.locales)) {
+		changes[locale] = {missing, extra};
+		console.log(`Updating ${theme.themePath}/locales/${locale}.json`);
+	}
+
+	const {applyChanges} = require('./_internal/update-locales.js');
+	return applyChanges(changes, theme, false, verbose);
+}
+
+/**
  * @param {Options} options
  * @param {ParsedTheme} theme
  */
-function findCommand(options, theme) {
+async function findCommand(options, theme) {
 	const {update, fail, json, verbose, 'special-characters': specialCharacters} = options;
 
 	if (update && fail) {
@@ -148,7 +177,13 @@ function findCommand(options, theme) {
 			theme.visitor.textToTranslate,
 			specialCharacters,
 		);
-		return applyThemeChanges(theme, changes, verbose);
+
+		const results = await Promise.all([
+			applyThemeChanges(theme, changes, verbose),
+			applyLocaleChanges(theme, specialCharacters, verbose),
+		]);
+
+		return results[0] + results[1];
 	}
 
 	const {themePath} = theme;
