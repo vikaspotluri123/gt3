@@ -78,22 +78,6 @@ class MarkUsedHelpers extends Rule {
                 console.log(`${this.fileName}: "${token}"`);
             }
         }
-
-        // const leafNodes = $('body *:not(:has(*))');
-        // leafNodes.each((i, el) => {
-        //     this;
-
-        //     if (el.tagName === 'script' || el.tagName === 'style') {
-        //         return;
-        //     }
-
-        //     const $el = $(el);
-        //     $el.parent.name;
-        //     const text = $el.text();
-        //     if (!text) {
-        //         return;
-        //     }
-        // });
     }
 
     /**
