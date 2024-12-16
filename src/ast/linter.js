@@ -47,7 +47,7 @@ class Linter {
 
             nodeHandlers.push({
                 rule,
-                visitor: rule.getVisitor()
+                visitor: rule
             });
         }
 

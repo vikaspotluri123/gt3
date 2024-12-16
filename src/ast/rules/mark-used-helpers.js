@@ -88,26 +88,13 @@ class MarkUsedHelpers extends Rule {
         super(...args);
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
+        this._textContent = '';
+        this._fileName = '';
     }
 
-    _markUsedHelpers(node) {
-        transformLiteralToPath(node); // Prevents issue when the helper name is double-quoted
-        const nodeName = getNodeName(node);
-        const helperType = classifyNode(node);
-
-        // helper nodes will break the rendering if there is no matching helper
-        // ambiguous nodes simply won't appear if there is no matching helper and no matching context
-        if (helperType === 'helper' || helperType === 'ambiguous') {
-            this.scanner.context.helpers.push({
-                node: nodeName,
-                type: node.type,
-                helperType,
-                loc: node.loc,
-                parameters: node.params ? node.params.map(p => p.original) : null
-            });
-        }
-    }
-
+    /**
+     * @private
+     */
     _analyze() {
         if (!this._textContent) {
             return;
@@ -158,42 +145,45 @@ class MarkUsedHelpers extends Rule {
         return this._scanner;
     }
 
-    visitor() {
-        const self = this;
-        this._textContent = '';
-        const markSourceVisitor = node => self.markSource(node.loc.start, node.loc.end);
-
-        return {
-            ContentStatement: (node) => {
-                this._fileName = node.loc.source;
-                /** @type {string} */
-                const text = node.value.trim();
-                if (!text) {
-                    return;
-                }
-
-
-                if (this._textContent) {
-                    this._textContent += MARKER_START + MARKER_END;
-                }
-
-                this._textContent += node.value;
-            },
-            BlockStatement: this.visitBlockStatement.bind(this),
-            PartialStatement: markSourceVisitor,
-            PartialBlockStatement: debug,
-            DecoratorBlock: debug,
-            Decorator: debug,
-            MustacheStatement: markSourceVisitor,
-            CommentStatement: markSourceVisitor,
-            SubExpression: debug,
-        };
+    /**
+     * @private
+     * @param {Parameters<import('handlebars').Visitor['accept']>[0]} node
+     */
+    markSourceVisitor (node) {
+        this.markSource(node.loc.start, node.loc.end);
     }
+
+    /**
+     * @override
+     * @type {import('handlebars').Visitor['ContentStatement']}
+     */
+    ContentStatement(node) {
+        this._fileName = node.loc.source;
+        const text = node.value.trim();
+        if (!text) {
+            return;
+        }
+
+
+        if (this._textContent) {
+            this._textContent += MARKER_START + MARKER_END;
+        }
+
+        this._textContent += node.value;
+    }
+
+    PartialStatement = this.markSourceVisitor.bind(this);
+    PartialBlockStatement = debug;
+    DecoratorBlock = debug;
+    Decorator = debug;
+    MustacheStatement = this.markSourceVisitor.bind(this);
+    CommentStatement = this.markSourceVisitor.bind(this);
+    SubExpression = debug;
 
     /**
      * @type {import('handlebars').Visitor['BlockStatement']}
      */
-    visitBlockStatement(node) {
+    BlockStatement(node) {
         const ifTrue = node.program;
         const ifFalse = node.inverse;
         const loc = node.loc;
@@ -221,6 +211,7 @@ class MarkUsedHelpers extends Rule {
 
     /**
      * Replaces a section of the source code with a marker
+     * @private
      * @param {Position} start
      * @param {Position} end
      */
@@ -271,53 +262,6 @@ class MarkUsedHelpers extends Rule {
                 + line.slice(endingIndex);
             markerIndex += width;
         }
-    }
-
-    /**
-     * @param {Program} program
-     * @param {SourceLocation} loc
-     */
-    markBlockStart(program, loc) {
-        if (!program) {
-            return;
-        }
-
-        const endNode = program.body[0];
-
-        if (isBlockNode(endNode)) {
-            this.visitBlockStatement(endNode);
-            return;
-        }
-
-        if (endNode.type !== 'ContentStatement' && endNode.type !== 'MustacheStatement') {
-            throw new Error('Unexpected state');
-        }
-
-        /** @type {Position} */
-        const endLoc = structuredClone(endNode.loc.start);
-
-        // CASE: start of line --> go back 1 character
-        if (endLoc.column === 0) {
-            endLoc.line -= 1;
-            endLoc.column = this.sourceLines[endLoc.line - 1].length - 1;
-        }
-
-        this.markSource(loc.start, endLoc);
-    }
-
-    markBlockEnd (program, loc) {
-        if (!program) {
-            throw new Error('Unexpected state');
-        }
-
-        const endNode = program.body[program.body.length - 1]
-
-        if (endNode.type !== 'ContentStatement' && endNode.type !== 'MustacheStatement') {
-            throw new Error('Unexpected state');
-        }
-
-        // TODO: determine if we need to add any newline normalization
-        this.markSource(endNode.loc.end, loc.end);
     }
 }
 
