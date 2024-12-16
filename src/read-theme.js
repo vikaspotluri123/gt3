@@ -23,7 +23,6 @@ const linter = new ASTLinter({
  * @param {import('fs').Dirent} dirent
  */
 function isIgnoredDirent(dirent) {
-    console.log(dirent, typeof dirent);
     return dirent.isDirectory() || ignore.includes(dirent.name);
 }
 
