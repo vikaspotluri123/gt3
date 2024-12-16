@@ -57,10 +57,11 @@ function assertHasAnnotations(object) {
  */
 function stringifyJson(object) {
 	assertHasAnnotations(object);
-	const {NEWLINE, INDENTATION} = object;
-	const serialized = JSON.stringify(object, null, INDENTATION);
+	const newline = object[NEWLINE];
+	const indentation = object[INDENTATION];
+	const serialized = JSON.stringify(object, null, indentation);
 
-	return NEWLINE === '\n' ? serialized : serialized.replaceAll('\n', NEWLINE) + NEWLINE;
+	return newline === '\n' ? serialized : serialized.replaceAll('\n', newline) + newline;
 }
 
 module.exports.NEWLINE = NEWLINE;

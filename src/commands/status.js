@@ -99,7 +99,7 @@ function statusCommand(options, theme) {
 			console.log(JSON.stringify(jsonResults, null, 2));
 		}
 
-		return applyChanges(jsonResults, theme, json, verbose);
+		return applyChanges(jsonResults, theme, !json, verbose);
 	}
 
 	if (json) {
