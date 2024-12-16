@@ -36,6 +36,8 @@ function isLocSame(left, right) {
     return left.line === right.line && left.column === right.column;
 }
 
+const MARKER_REGEX = new RegExp(`${MARKER_START}[.\n]+${MARKER_END}`,'g');
+
 class MarkUsedHelpers extends Rule {
     /**
      * @param {ConstructorParameters<typeof Rule>} args
@@ -44,7 +46,6 @@ class MarkUsedHelpers extends Rule {
         super(...args);
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
-        this._textContent = '';
     }
 
     /**
@@ -59,21 +60,17 @@ class MarkUsedHelpers extends Rule {
      * @private
      */
     _analyze() {
-        if (!this._textContent) {
-            return;
-        }
-
         globalThis.writeDebugFile?.(this.fileName, this.sourceLines);
 
         const cheerio = require('cheerio');
-        const $ = cheerio.load(this._textContent, {sourceCodeLocationInfo: true});
+        const $ = cheerio.load(this.sourceLines.join('\n'), {sourceCodeLocationInfo: true});
         for (const element of $(':not(style):not(script)').contents()) {
             if (element.type !== 'text') {
                 continue
             }
 
             const text = $(element).text();
-            for (const token of text.trim().split('__TT__')) {
+            for (const token of text.trim().split(MARKER_REGEX)) {
                 if (!token.trim()) {
                     continue;
                 }
@@ -105,24 +102,6 @@ class MarkUsedHelpers extends Rule {
      */
     markSourceVisitor (node) {
         this.markSource(node.loc.start, node.loc.end);
-    }
-
-    /**
-     * @override
-     * @type {import('handlebars').Visitor['ContentStatement']}
-     */
-    ContentStatement(node) {
-        const text = node.value.trim();
-        if (!text) {
-            return;
-        }
-
-
-        if (this._textContent) {
-            this._textContent += MARKER_START + MARKER_END;
-        }
-
-        this._textContent += node.value;
     }
 
     PartialStatement = this.markSourceVisitor.bind(this);
