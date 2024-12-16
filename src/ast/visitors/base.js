@@ -27,10 +27,14 @@ const VISITOR_METHODS = [
  * @param {Function} implementation
  */
 function wrappedVisitor(nodeName, implementation) {
+    if (Visitor.prototype[nodeName] === implementation) {
+        return implementation;
+    }
+
     return function (...args) {
         Visitor.prototype[nodeName].apply(this, args);
         return implementation.apply(this, args);
-    };
+    }
 }
 
 /**
