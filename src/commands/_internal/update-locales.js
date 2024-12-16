@@ -15,13 +15,13 @@ const {stringifyJson} = require('../../util/inline-json.js');
  */
 async function applyChanges(changes, theme, print, verbose) {
 	const promises = [];
-	const printVerbose = verbose && !print;
+	const printVerbose = print && verbose;
 
 	for (const [locale, {missing, extra}] of Object.entries(changes)) {
 		const filePath = `${theme.themePath}/locales/${locale}.json`;
 		const store = theme.locales[locale];
 
-		if (!print) {
+		if (print) {
 			console.log(`Updating ${filePath}`);
 		}
 
