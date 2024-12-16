@@ -1,6 +1,5 @@
 // @ts-check
 const fs = require('fs/promises');
-const _ = require('lodash');
 const path = require('path');
 const ASTLinter = require('./ast');
 
@@ -13,9 +12,14 @@ function isIgnoredDirent(dirent) {
     return dirent.isDirectory();
 }
 
-async function readThemeFiles(themePath) {
+/**
+ * @param {string} themePath
+ * @returns {Promise<Array<{path: string, contents: string}>>}
+ */
+async function getHandlebarsFiles(themePath) {
     themePath = path.join(themePath, '.');
     const response = [];
+    const promises = [];
 
     for await (const file of fs.glob(`${themePath}/**/*.hbs`, {withFileTypes: true})) {
         // TODO: when passed to `fs.glob#options.exclude`, the file name is passed instead of the dirent.
@@ -25,60 +29,32 @@ async function readThemeFiles(themePath) {
         }
 
         const fileName = path.relative(themePath, path.join(file.parentPath, file.name));
-        const extMatch = fileName.match(/.*?(\.[0-9a-z]+$)/i);
 
-        response.push({
-            file: fileName,
-            normalizedFile: fileName.replaceAll(/\\/g, ''),
-            ext: extMatch !== null ? extMatch[1] : undefined,
-            symlink: file.isSymbolicLink(),
-        });
+        promises.push(fs.readFile(path.join(themePath, fileName), 'utf8').then(contents => {
+            response.push({
+                path: fileName,
+                contents,
+            });
+        }));
     }
 
+    await Promise.all(promises);
     return response;
-};
-
-/**
- *
- * @param {Theme} theme
- * @returns {Promise<Theme>}
- */
-async function readFiles(theme) {
-    // CASE: we need the actual content of all css, hbs files, and package.json for our checks
-    return Promise.all(theme.files.map((themeFile) => {
-        return fs.readFile(path.join(theme.path, themeFile.file), 'utf8').then(function (content) {
-            themeFile.parsed = ASTLinter.parse(content, themeFile.file);
-            processHelpers(content, themeFile);
-        });
-    })).then(() => theme);
-};
-
-const processHelpers = function (content, themeFile) {
-    linter.verify({
-        parsed: themeFile.parsed,
-        visitor: require('./ast/rules/mark-used-helpers.js'),
-        source: content,
-        fileName: themeFile.file
-    });
-};
+}
 
 /**
  *
  * @param {string} themePath - path to the validated theme
- * @returns {Promise<Theme>}
  */
-module.exports = function readTheme(themePath) {
-    return readThemeFiles(themePath)
-        .then(function (themeFiles) {
-            return readFiles({
-                path: themePath,
-                files: themeFiles,
-            });
+module.exports = async function readTheme(themePath) {
+    const files = await getHandlebarsFiles(themePath);
+    for (const file of files) {
+        const parsed = ASTLinter.parse(file.contents, file.path);
+        linter.verify({
+            parsed,
+            visitor: require('./ast/rules/mark-used-helpers.js'),
+            source: file.contents,
+            fileName: file.path
         });
+    }
 };
-
-/**
- * @typedef {Object} Theme
- * @param {string} path
- * @param {string[]} files
- */
