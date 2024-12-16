@@ -3,7 +3,7 @@ const {exit} = require('node:process');
 
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
- * @typedef {'all' | 'verbose' | 'json'} Flag
+ * @typedef {'all' | 'verbose' | 'json' | 'fail' | 'strict'} Flag
  * @typedef {'baseLang'} Parameter
  * @typedef {Record<Flag, boolean> & Record<Parameter, string>} Options
  *
@@ -40,7 +40,12 @@ function analyzeLocale(expectedStrings, localeStrings) {
  * @param {ParsedTheme} theme
  */
 function statusCommand (options, theme) {
-  const {baseLang, all, verbose, json} = options;
+  const {baseLang, all, verbose, json, fail, strict} = options;
+
+  if (strict && !fail) {
+    console.error('Error: --strict can only be used with --fail');
+    exit(1);
+  }
 
   /** @type {Set<string>} */
   let expectedStrings;
@@ -85,10 +90,14 @@ function statusCommand (options, theme) {
   }
 
   results.sort((a, b) => b.score - a.score);
+  let strictFail = false;
+  let failed = false;
 
   for (const {locale, missing, extra} of results) {
     const fileName = `${theme.themePath}/locales/${locale}.json`;
     console.log(`${fileName}: +${extra.length}/-${missing.length}`);
+    failed ||= missing.length > 0;
+    strictFail ||= extra.length > 0;
 
     if (!verbose) {
       continue
@@ -108,6 +117,8 @@ function statusCommand (options, theme) {
 
     console.log();
   }
+
+  exit(Number(strict ? strictFail || failed : fail ? failed : 0));
 }
 
 module.exports.statusCommand = statusCommand;
