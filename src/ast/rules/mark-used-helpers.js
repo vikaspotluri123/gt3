@@ -23,7 +23,10 @@ function markerOfWidth(width) {
     return MARKER_START + '.'.repeat(width - MIN_MARKER_WIDTH) + MARKER_END;
 }
 
-function notImplemented(node) {
+/**
+ * @returns {never}
+ */
+function notImplemented() {
     debugger;
     throw new Error('Not implemented');
 }
@@ -46,6 +49,8 @@ class MarkUsedHelpers extends Rule {
         super(...args);
         this.sourceLines = this.source.split('\n');
         this.originalSourceLines = this.sourceLines.slice();
+        /** @type {Map<string, SourceLocation[]>} */
+        this.textToTranslate = new Map();
     }
 
     /**
@@ -53,13 +58,13 @@ class MarkUsedHelpers extends Rule {
      */
     enter(...args) {
         super.enter(...args);
-        this._analyze();
+        this.analyze();
     }
 
     /**
      * @private
      */
-    _analyze() {
+    analyze() {
         globalThis.writeDebugFile?.(this.fileName, this.sourceLines);
 
         const cheerio = require('cheerio');
@@ -69,13 +74,79 @@ class MarkUsedHelpers extends Rule {
                 continue
             }
 
-            const text = $(element).text();
-            for (const token of text.trim().split(MARKER_REGEX)) {
-                if (!token.trim()) {
+            const sourceCodeLocation = element.sourceCodeLocation;
+
+            if (!sourceCodeLocation) {
+                throw new Error('Unexpected state');
+            }
+
+            this.analyzeTextBlock($(element).text(), sourceCodeLocation);
+        }
+    }
+
+    /**
+     * @private
+     * @param {string} text
+     * @param {NonNullable<import('domhandler').Node['sourceCodeLocation']>} sourceCodeLocation
+     */
+    analyzeTextBlock(text, sourceCodeLocation) {
+        let lastIndex = 0;
+
+        if (text.replaceAll(MARKER_REGEX, '').trim().length === 0) {
+            return;
+        }
+
+        while (true) {
+            const match = MARKER_REGEX.exec(text);
+            let textStart;
+            let textEnd;
+            let nextIndex;
+
+            if (match !== null) {
+                textStart = lastIndex;
+                textEnd = match.index;
+                nextIndex = match.index + match[0].length;
+
+                // CASE: back-to-back marker
+                // CASE: marker at the start of the text
+                if (match.index === lastIndex || textStart === textEnd) {
+                    lastIndex = nextIndex;
+
+                    if (nextIndex === text.length) {
+                        break;
+                    }
+
                     continue;
                 }
+            } else if (lastIndex !== text.length) {
+                textStart = lastIndex;
+                textEnd = text.length;
+                nextIndex = text.length;
+            } else {
+                // Type safety
+                throw new Error('Unexpected state');
+            }
 
-                console.log(`${this.fileName}: "${token}"`);
+            const translationText = text.slice(textStart, textEnd);
+            console.log(`${this.fileName}: ${translationText}`);
+            const translationStore = this.textToTranslate.get(translationText) || [];
+            this.textToTranslate.set(translationText, translationStore);
+            const location = {
+                source: this.fileName,
+                start: {
+                    line: sourceCodeLocation.startLine,
+                    column: sourceCodeLocation.startCol + lastIndex,
+                },
+                end: {
+                    line: sourceCodeLocation.endLine,
+                    column: sourceCodeLocation.startCol + nextIndex,
+                }
+            };
+            translationStore.push(location);
+            lastIndex = nextIndex;
+
+            if (nextIndex === text.length) {
+                break;
             }
         }
     }
