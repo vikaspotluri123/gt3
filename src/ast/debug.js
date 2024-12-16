@@ -8,8 +8,8 @@
  */
 
 function writeDebugFile(fileName, contents) {
-	const fs = require('fs');
-	const path = require('path');
+	const fs = require('node:fs');
+	const path = require('node:path');
 
 	const filePath = path.join(process.cwd(), 'source-debug', fileName);
 	const dir = path.dirname(filePath);

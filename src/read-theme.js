@@ -1,6 +1,6 @@
 // @ts-check
-const fs = require('fs/promises');
-const path = require('path');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 const {parseWithoutProcessing} = require('handlebars');
 
 /**
@@ -19,7 +19,6 @@ function isIgnoredDirent(dirent) {
  * @returns {Promise<Array<{path: string, contents: string}>>}
  */
 async function getHandlebarsFiles(themePath) {
-	themePath = path.join(themePath, '.');
 	const response = [];
 	const promises = [];
 
@@ -86,15 +85,16 @@ async function getLocales(themePath) {
  * @returns {Promise<ParsedTheme>}
  */
 module.exports = async function readTheme(themePath, Visitor) {
-	const locales = getLocales(themePath);
-	const files = await getHandlebarsFiles(themePath);
+	const resolvedThemePath = path.join(themePath, '.');
+	const locales = getLocales(resolvedThemePath);
+	const files = await getHandlebarsFiles(resolvedThemePath);
 	const visitorContext = Visitor.createContext();
 	for (const file of files) {
 		let ast;
 
 		try {
 			ast = parseWithoutProcessing(file.contents, {srcName: file.path});
-		} catch (error) {
+		} catch (_error) {
 			// TODO: handle error
 			continue;
 		}
@@ -104,7 +104,7 @@ module.exports = async function readTheme(themePath, Visitor) {
 	}
 
 	return {
-		themePath,
+		themePath: resolvedThemePath,
 		visitor: visitorContext,
 		files,
 		locales: await locales,

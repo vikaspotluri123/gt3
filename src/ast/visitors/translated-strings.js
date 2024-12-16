@@ -1,5 +1,5 @@
 // @ts-check
-const {BaseVisitor} = require('./base');
+const {BaseVisitor} = require('./base.js');
 
 /**
  * @typedef {import('../types.js').Visitor} Visitor
@@ -38,7 +38,6 @@ function isStringLiteralNode(node) {
  * @returns {never}
  */
 function notImplemented() {
-	debugger;
 	throw new Error('Not implemented');
 }
 

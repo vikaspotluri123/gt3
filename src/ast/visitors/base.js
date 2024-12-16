@@ -54,9 +54,9 @@ class BaseVisitor extends Visitor {
 	 * @param {Object} options
 	 * @param {string} options.source - The source code to verify
 	 * @param {string} options.fileName - Name of the source code to identify by.
-	 * @param {TContext} context
+	 * @param {TContext} _context
 	 */
-	constructor(options, context) {
+	constructor(options, _context) {
 		super();
 		this.source = options.source;
 		this.fileName = options.fileName;

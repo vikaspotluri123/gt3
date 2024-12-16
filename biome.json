@@ -6,8 +6,9 @@
 		"useIgnoreFile": false
 	},
 	"files": {
+		"include": ["./src/**/*.js", "./bin/*.js"],
 		"ignoreUnknown": false,
-		"ignore": []
+		"ignore": ["themes"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -19,7 +20,10 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"all": true,
+			"correctness": {
+				"noNodejsModules": "off"
+			}
 		}
 	},
 	"javascript": {
@@ -28,5 +32,28 @@
 			"bracketSpacing": false,
 			"lineWidth": 100
 		}
-	}
+	},
+	"overrides": [
+		{
+			"include": ["src/commands/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off",
+						"noConsoleLog": "off"
+					}
+				}
+			}
+		},
+		{
+			"include": ["src/ast/visitors/"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useNamingConvention": "off"
+					}
+				}
+			}
+		}
+	]
 }

@@ -10,11 +10,11 @@ function checkFlags(args, flags, parameters) {
 	let errored = false;
 
 	for (const [key, value] of Object.entries(args)) {
-		if (key === '_' || key == '--') {
+		if (key === '_' || key === '--') {
 			continue;
 		}
 
-		if (!flags.includes(key) && !parameters.includes(key)) {
+		if (!(flags.includes(key) || parameters.includes(key))) {
 			console.error(`Error: unknown argument: ${key}`);
 			errored = true;
 			continue;
@@ -29,7 +29,6 @@ function checkFlags(args, flags, parameters) {
 		if (parameters.includes(key) && typeof value !== 'string') {
 			console.error(`Error: expected ${key} to have a value`);
 			errored = true;
-			continue;
 		}
 	}
 

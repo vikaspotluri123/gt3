@@ -30,12 +30,11 @@ function markerOfWidth(width) {
 }
 
 /**
- * @param {Node} node
+ * @param {Node} _node
  * @returns {never}
  */
-function notImplemented(node) {
-	debugger;
-	node;
+function notImplemented(_node) {
+	_node;
 	throw new Error('Not implemented');
 }
 
@@ -155,27 +154,31 @@ class TextExtractorVisitor extends BaseVisitor {
 	 * @param {LocationResolver} locationResolver the line tracker for the unsliced text
 	 */
 	storeText(text, startingIndex, endingIndex, locationResolver) {
-		const leadingWhitespace = LEADING_WHITESPACE.exec(text);
+		let finalStartingIndex = startingIndex;
+		let finalEndingIndex = endingIndex;
+		let finalText = text;
+
+		const leadingWhitespace = LEADING_WHITESPACE.exec(finalText);
 		if (leadingWhitespace !== null) {
-			text = text.slice(leadingWhitespace[0].length);
-			startingIndex += leadingWhitespace[0].length;
+			finalText = finalText.slice(leadingWhitespace[0].length);
+			finalStartingIndex += leadingWhitespace[0].length;
 		}
 
-		const trailingWhitespace = TRAILING_WHITESPACE.exec(text);
+		const trailingWhitespace = TRAILING_WHITESPACE.exec(finalText);
 		if (trailingWhitespace !== null) {
-			text = text.slice(0, -trailingWhitespace[0].length);
-			endingIndex -= trailingWhitespace[0].length;
+			finalText = finalText.slice(0, -trailingWhitespace[0].length);
+			finalEndingIndex -= trailingWhitespace[0].length;
 		}
 
 		// CASE: text was only whitespace, nothing to do
-		if (text.length === 0) {
+		if (finalText.length === 0) {
 			return;
 		}
 
-		const location = locationResolver.getLocationForRange(startingIndex, endingIndex);
+		const location = locationResolver.getLocationForRange(finalStartingIndex, finalEndingIndex);
 
-		const translationStore = this.textToTranslate.get(text) || [];
-		this.textToTranslate.set(text, translationStore);
+		const translationStore = this.textToTranslate.get(finalText) || [];
+		this.textToTranslate.set(finalText, translationStore);
 		translationStore.push(location);
 	}
 

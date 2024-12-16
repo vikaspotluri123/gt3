@@ -39,6 +39,7 @@ function prepareTranslationTextForUpdate(textToTranslate, includeSpecialCharacte
 		}
 
 		for (const location of sources) {
+			// biome-ignore lint/suspicious/noAssignInExpressions: it's harder to grok with it
 			const store = (changesPerFile[location.source] ??= []);
 			store.push({text: token, location});
 		}
@@ -64,16 +65,17 @@ function prepareTranslationTextForUpdate(textToTranslate, includeSpecialCharacte
  */
 function wrapTextInTranslationHelper(text) {
 	let quote = '"';
+	let normalizedText = text;
 
 	if (text.includes('"')) {
 		if (text.includes("'")) {
-			text = text.replaceAll('"', '\\"');
+			normalizedText = text.replaceAll('"', '\\"');
 		} else {
 			quote = "'";
 		}
 	}
 
-	return `{{t ${quote}${text}${quote}}}`;
+	return `{{t ${quote}${normalizedText}${quote}}}`;
 }
 
 /**
@@ -181,7 +183,7 @@ function findCommand(options, theme) {
 		}
 	}
 
-	return Number(fail ? Boolean(textToTranslate.size) : 0);
+	return Number(fail ? textToTranslate.size > 0 : 0);
 }
 
 module.exports.findCommand = findCommand;
