@@ -57,7 +57,8 @@ class Linter {
                 helpers: [],
                 inlinePartials: [],
                 customThemeSettings: [],
-                usedPageProperties: []
+                usedPageProperties: [],
+                cleanupHandlers: [],
             };
         }
         Scanner.prototype = new Handlebars.Visitor();
@@ -168,6 +169,10 @@ class Linter {
 
         if (scanner.context.usedPageProperties) {
             this.usedPageProperties = scanner.context.usedPageProperties;
+        }
+
+        for (const cleanupHandler of scanner.context.cleanupHandlers) {
+            cleanupHandler();
         }
 
         return messages;
