@@ -1,9 +1,9 @@
 // @ts-check
 
 /**
+ * @typedef {import('./types.js').SourceLocation} SourceLocation
+ * @typedef {import('./types.js').Position} Position
  * @typedef {{sourceLines: string[]; originalSourceLines: string[]}} MinimalRule
- * @typedef {Parameters<import('handlebars').Visitor['BlockStatement']>[0]['loc']} SourceLocation
- * @typedef {SourceLocation['start']} Position
  * @typedef {{loc: SourceLocation}} MinimalLocation
  */
 

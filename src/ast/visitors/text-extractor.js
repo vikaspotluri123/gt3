@@ -3,10 +3,12 @@ const {LocationResolver} = require('../../util/location-resolver.js');
 const {BaseVisitor} = require('./base.js');
 
 /**
- * @typedef {Parameters<import('handlebars').Visitor['Program']>[0]} Program
- * @typedef {Parameters<import('handlebars').Visitor['BlockStatement']>[0]['loc']} SourceLocation
- * @typedef {SourceLocation['start']} Position
+ * @typedef {import('../types.js').Position} Position
+ * @typedef {import('../types.js').Visitor} Visitor
+ * @typedef {import('../types.js').SourceLocation} SourceLocation
+ * @typedef {import('../types.js').Node} Node
  */
+
 
 const MARKER_START = '__TT';
 const MARKER_END = '__';
@@ -62,10 +64,10 @@ class TextExtractorVisitor extends BaseVisitor {
     }
 
     /**
-     * @param {Parameters<import('handlebars').Visitor['accept']>} args
+     * @param {Node} node
      */
-    enter(...args) {
-        super.enter(...args);
+    enter(node) {
+        super.enter(node);
         this.analyze();
     }
 
@@ -182,7 +184,7 @@ class TextExtractorVisitor extends BaseVisitor {
 
     /**
      * @private
-     * @param {Parameters<import('handlebars').Visitor['accept']>[0]} node
+     * @param {Node} node
      */
     markSourceVisitor (node) {
         this.markSource(node.loc.start, node.loc.end);
@@ -197,7 +199,7 @@ class TextExtractorVisitor extends BaseVisitor {
     SubExpression = notImplemented;
 
     /**
-     * @type {import('handlebars').Visitor['BlockStatement']}
+     * @type {Visitor['BlockStatement']}
      */
     BlockStatement(node) {
         const ifTrue = node.program;

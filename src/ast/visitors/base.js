@@ -63,7 +63,7 @@ class BaseVisitor extends Visitor {
     }
 
     /**
-     * @param {Parameters<import('handlebars').Visitor['accept']>[0]} node
+     * @param {import('../types.js').Node} node
      */
     enter(node) {
         this.accept(node);
