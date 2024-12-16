@@ -1,6 +1,7 @@
 {
 	"name": "gt3",
 	"type": "commonjs",
+	"bin": "./bin/gt3",
 	"scripts": {
 		"lint": "biome lint",
 		"format": "biome format"

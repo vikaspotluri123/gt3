@@ -2,11 +2,11 @@
 // @ts-check
 const {argv, exit} = require('node:process');
 
-require('./src/commands/_internal/version-check.js');
-require('./src/commands/_internal/suppress-warnings.js');
+require('../src/commands/_internal/version-check.js');
+require('../src/commands/_internal/suppress-warnings.js');
 
 /**
- * @typedef {import('./src/types.js').ParsedTheme} ParsedTheme
+ * @typedef {import('../src/types.js').ParsedTheme} ParsedTheme
  * @typedef {{
   flags?: string[],
   parameters?: string[],
@@ -46,11 +46,11 @@ function deferredCommand(importPath, exportName) {
 	return (args, theme) => import(importPath).then((m) => m[exportName](args, theme));
 }
 
-/** @type {import('./src/commands/find.js').Flag[]} */
+/** @type {import('../src/commands/find.js').Flag[]} */
 const findFlags = ['update', 'fail', 'json', 'verbose', 'special-characters'];
-/** @type {import('./src/commands/status.js').Flag[]} */
+/** @type {import('../src/commands/status.js').Flag[]} */
 const statusFlags = ['all', 'verbose', 'json', 'fail', 'strict'];
-/** @type {import('./src/commands/status.js').Parameter[]} */
+/** @type {import('../src/commands/status.js').Parameter[]} */
 const statusParameters = ['base-lang'];
 
 /**
@@ -120,7 +120,7 @@ function parseCommand() {
 	const flags = command.flags ?? [];
 	const parameters = command.parameters ?? [];
 
-	require('./src/commands/_internal/check-flags.js').checkFlags(args, flags, parameters);
+	require('../src/commands/_internal/check-flags.js').checkFlags(args, flags, parameters);
 
 	return {
 		args,
@@ -131,11 +131,11 @@ function parseCommand() {
 
 async function run() {
 	const {themePath, args, command} = parseCommand();
-	const readTheme = require('./src/read-theme.js');
-	const {multiVisitor} = require('./src/ast/visitors/many.js');
+	const readTheme = require('../src/read-theme.js');
+	const {multiVisitor} = require('../src/ast/visitors/many.js');
 	const visitors = [
-		require('./src/ast/visitors/translated-strings.js').TranslatedStringsVisitor,
-		require('./src/ast/visitors/text-extractor.js'),
+		require('../src/ast/visitors/translated-strings.js').TranslatedStringsVisitor,
+		require('../src/ast/visitors/text-extractor.js'),
 	];
 
 	const Visitor = multiVisitor(visitors);
