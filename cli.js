@@ -59,7 +59,12 @@ const commands = {
 };
 
 if (argv.length < 4) {
-  console.error(help);
+  console.log(help);
+
+  if (argv.length === 3 && argv[2] !== 'help') {
+    console.error('Error: Missing theme path');
+  }
+
   exit(1);
 }
 
