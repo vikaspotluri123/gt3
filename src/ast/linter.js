@@ -1,5 +1,5 @@
 // @ts-check
-const BaseRule = require('./rules/base');
+const BaseVisitor = require('./visitors/base.js');
 
 class Linter {
   /**
@@ -10,7 +10,7 @@ class Linter {
    * @param {Object} options.parsed.ast - The ast tree to lint.
    * @param {Object} options.parsed.error - An error that happened when parsing.
    * @param {string} options.fileName - Name of the source code to identify by.
-   * @param {typeof BaseRule<TContext>} options.visitor - Array of Rule class instances to use for verification.
+   * @param {typeof BaseVisitor<TContext>} options.visitor - Array of Rule class instances to use for verification.
    * @param {TContext} context - Global context for the visitor.
    *
    * @returns {LintResult[]} messages - lint results.

@@ -42,7 +42,7 @@ class LocationResolver {
   /**
    * @param {number} startingIndex
    * @param {number} endingIndex
-   * @returns {import('../ast/rules/mark-used-helpers.js').SourceLocation}
+   * @returns {import('../ast/visitors/text-extractor.js').SourceLocation}
    */
   getLocationForRange(startingIndex, endingIndex) {
     if (startingIndex > endingIndex) {

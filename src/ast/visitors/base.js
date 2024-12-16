@@ -37,7 +37,7 @@ function wrappedVisitor(nodeName, implementation) {
  * @abstract
  * @template TContext
  */
-class BaseRule extends Visitor {
+class BaseVisitor extends Visitor {
     /**
      * @abstract
      * Returns `TContext`, but that's not allowed in Typescript
@@ -70,4 +70,4 @@ class BaseRule extends Visitor {
     }
 };
 
-module.exports = BaseRule;
+module.exports.BaseVisitor = BaseVisitor;

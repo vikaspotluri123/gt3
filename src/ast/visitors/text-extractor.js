@@ -1,6 +1,6 @@
 // @ts-check
 const {LocationResolver} = require('../../util/location-resolver.js');
-const Rule = require('./base');
+const {BaseVisitor} = require('./base.js');
 
 /**
  * @typedef {Parameters<import('handlebars').Visitor['Program']>[0]} Program
@@ -43,7 +43,7 @@ function isLocSame(left, right) {
     return left.line === right.line && left.column === right.column;
 }
 
-class MarkUsedHelpers extends Rule {
+class TextExtractorVisitor extends BaseVisitor {
     static createContext() {
         return {
             textToTranslate: new Map(),
@@ -51,7 +51,7 @@ class MarkUsedHelpers extends Rule {
     }
 
     /**
-     * @param {ConstructorParameters<typeof Rule>[0]} options
+     * @param {ConstructorParameters<typeof BaseVisitor>[0]} options
      * @param {{textToTranslate: Map<string, SourceLocation[]>}} context
      */
     constructor(options, context) {
@@ -281,4 +281,4 @@ class MarkUsedHelpers extends Rule {
     }
 }
 
-module.exports = MarkUsedHelpers;
+module.exports = TextExtractorVisitor;
