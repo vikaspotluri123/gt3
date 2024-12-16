@@ -49,7 +49,7 @@ function deferredCommand(importPath, exportName) {
 /** @type {import('../src/commands/find.js').Flag[]} */
 const findFlags = ['update', 'fail', 'json', 'verbose', 'special-characters'];
 /** @type {import('../src/commands/status.js').Flag[]} */
-const statusFlags = ['all', 'verbose', 'json', 'fail', 'strict'];
+const statusFlags = ['all', 'verbose', 'json', 'fail', 'strict', 'update'];
 /** @type {import('../src/commands/status.js').Parameter[]} */
 const statusParameters = ['base-lang'];
 

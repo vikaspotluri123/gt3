@@ -2,7 +2,7 @@
 
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
- * @typedef {'all' | 'verbose' | 'json' | 'fail' | 'strict'} Flag
+ * @typedef {'all' | 'verbose' | 'json' | 'fail' | 'strict' | 'update'} Flag
  * @typedef {'base-lang'} Parameter
  * @typedef {Record<Flag, boolean> & Record<Parameter, string>} Options
  *
@@ -39,10 +39,15 @@ function analyzeLocale(expectedStrings, localeStrings) {
  * @param {ParsedTheme} theme
  */
 function statusCommand(options, theme) {
-	const {'base-lang': baseLang, all, verbose, json, fail, strict} = options;
+	const {'base-lang': baseLang, all, verbose, json, fail, strict, update} = options;
 
 	if (strict && !fail) {
 		console.error('Error: --strict can only be used with --fail');
+		return 1;
+	}
+
+	if (update && fail) {
+		console.error('Error: Cannot use --update and --fail together');
 		return 1;
 	}
 
@@ -61,6 +66,7 @@ function statusCommand(options, theme) {
 	}
 
 	const results = [];
+	/** @type {import('./_internal/update-locales.js').JsonChanges} */
 	const jsonResults = {};
 	let strictFail = false;
 	let failed = false;
@@ -81,14 +87,20 @@ function statusCommand(options, theme) {
 		strictFail ||= extra.length > 0;
 		failed ||= missing.length > 0;
 
-		if (json) {
-			jsonResults[locale] = {missing, extra};
-		} else {
-			results.push({locale, score, missing, extra});
-		}
+		jsonResults[locale] = {missing, extra};
+		results.push({locale, score, missing, extra});
 	}
 
 	const code = Number(strict ? strictFail || failed : fail ? failed : 0);
+
+	if (update) {
+		const {applyChanges} = require('./_internal/update-locales.js');
+		if (json) {
+			console.log(JSON.stringify(jsonResults, null, 2));
+		}
+
+		return applyChanges(jsonResults, theme, json, verbose);
+	}
 
 	if (json) {
 		console.log(JSON.stringify(jsonResults, null, 2));
