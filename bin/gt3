@@ -23,15 +23,16 @@ Commands:
 
   find <path-to-theme> : Finds untranslated strings
     --special-characters: Consider strings of only special characters as untranslated
-    --update: Automatically wrap untranslated strings. This will modify your theme files, so be careful!
+    --update: Automatically wrap untranslated strings and add them to locales. This will modify your theme files, so be careful!
     --fail: Exit with a non-zero exit code if any untranslated strings are found. Cannot be used with --update
     --json: Output the results in JSON format
     --verbose: Include file name and line number in the output
 
   status <path-to-theme> : Reports the translation status of each locale. Empty translations are ignored.
     --all: Report fully translated locales, not just those with untranslated strings
+		--update: Automatically sync missing/extra strings in the locales
     --base-locale=<locale>: Use this locale as the fully translated reference instead of reading the theme
-    --fail: Exit with a non-zero exit code if any themes are not fully translated
+    --fail: Exit with a non-zero exit code if any locales are missing strings
     --strict: When used with --fail, also fail if any locales have extra strings
     --json: Output the results in JSON format
     --verbose: List the missing/extra strings for each locale
