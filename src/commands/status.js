@@ -4,7 +4,7 @@ const {exit} = require('node:process');
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
  * @typedef {'all' | 'verbose' | 'json' | 'fail' | 'strict'} Flag
- * @typedef {'baseLang'} Parameter
+ * @typedef {'base-lang'} Parameter
  * @typedef {Record<Flag, boolean> & Record<Parameter, string>} Options
  *
  * @typedef {{
@@ -40,7 +40,7 @@ function analyzeLocale(expectedStrings, localeStrings) {
  * @param {ParsedTheme} theme
  */
 function statusCommand (options, theme) {
-  const {baseLang, all, verbose, json, fail, strict} = options;
+  const {'base-lang': baseLang, all, verbose, json, fail, strict} = options;
 
   if (strict && !fail) {
     console.error('Error: --strict can only be used with --fail');
@@ -73,7 +73,7 @@ function statusCommand (options, theme) {
 
     const score = missing.length + extra.length;
 
-    if (all && score === 0) {
+    if (!all && score === 0) {
       continue;
     }
 
@@ -105,7 +105,7 @@ function statusCommand (options, theme) {
 
     for (const [name, result] of Object.entries({extra, missing})) {
       if (result.length === 0) {
-        console.log(` - No ${name} strings`);
+        console.log(`  No ${name} strings 🎉`);
       } else {
         const sentenceName = name[0].toUpperCase() + name.slice(1);
         console.log(`  ${sentenceName} strings:`);
