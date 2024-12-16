@@ -64,17 +64,22 @@ class Linter {
 
         const nodeTypes = [
             'Program',
-            'MustacheStatement',
             'BlockStatement',
             'PartialStatement',
             'PartialBlockStatement',
-            'PathExpression',
+            'DecoratorBlock',
+            'Decorator',
+            'MustacheStatement',
+            'ContentStatement',
+            'CommentStatement',
             'SubExpression',
-            'DecoratorBlock'
-            // the following types are not used in Ghost or we don't validate
-            // 'ContentStatement',
-            // 'CommentStatement,
-            // 'Decorator',
+            'PathExpression',
+            'StringLiteral',
+            'NumberLiteral',
+            'BooleanLiteral',
+            'UndefinedLiteral',
+            'NullLiteral',
+            'Hash',
         ];
 
         nodeTypes.forEach((nodeType) => {
