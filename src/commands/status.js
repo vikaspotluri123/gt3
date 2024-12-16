@@ -1,5 +1,4 @@
 // @ts-check
-const {exit} = require('node:process');
 
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
@@ -44,7 +43,7 @@ function statusCommand (options, theme) {
 
   if (strict && !fail) {
     console.error('Error: --strict can only be used with --fail');
-    exit(1);
+    return 1;
   }
 
   /** @type {Set<string>} */
@@ -53,7 +52,7 @@ function statusCommand (options, theme) {
   if (baseLang) {
     if (!Object.hasOwn(theme.locales, baseLang)) {
       console.error(`Error: missing base local ${theme.themePath}/locales/${baseLang}.json`);
-      exit(1);
+      return 1;
     }
 
     expectedStrings = new Set(Object.keys(theme.locales[baseLang]));
@@ -63,6 +62,8 @@ function statusCommand (options, theme) {
 
   const results = [];
   const jsonResults = {};
+  let strictFail = false;
+  let failed = false;
 
   for (const [locale, strings] of Object.entries(theme.locales)) {
     if (locale === baseLang) {
@@ -77,6 +78,9 @@ function statusCommand (options, theme) {
       continue;
     }
 
+    strictFail ||= extra.length > 0;
+    failed ||= missing.length > 0;
+
     if (json) {
       jsonResults[locale] = {missing, extra};
     } else {
@@ -84,20 +88,18 @@ function statusCommand (options, theme) {
     }
   }
 
+  const code = Number(strict ? strictFail || failed : fail ? failed : 0);
+
   if (json) {
     console.log(JSON.stringify(jsonResults, null, 2));
-    return;
+    return code;
   }
 
   results.sort((a, b) => b.score - a.score);
-  let strictFail = false;
-  let failed = false;
 
   for (const {locale, missing, extra} of results) {
     const fileName = `${theme.themePath}/locales/${locale}.json`;
     console.log(`${fileName}: +${extra.length}/-${missing.length}`);
-    failed ||= missing.length > 0;
-    strictFail ||= extra.length > 0;
 
     if (!verbose) {
       continue
@@ -118,7 +120,7 @@ function statusCommand (options, theme) {
     console.log();
   }
 
-  exit(Number(strict ? strictFail || failed : fail ? failed : 0));
+  return code;
 }
 
 module.exports.statusCommand = statusCommand;

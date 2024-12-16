@@ -10,7 +10,7 @@ require('./src/commands/_internal/suppress-warnings.js');
  * @typedef {{
   flags?: string[],
   parameters?: string[],
-  run: (args: { [key: string]: string | boolean}, theme: ParsedTheme) => void | Promise<void>
+  run: (args: { [key: string]: string | boolean}, theme: ParsedTheme) => number | Promise<number>
  }} CommandDefinition
  */
 
@@ -36,29 +36,57 @@ Commands:
     --strict: When used with --fail, also fail if any locales have extra strings
     --json: Output the results in JSON format
     --verbose: List the missing/extra strings for each locale
+
+  ci <path-to-theme> : Runs "find" and "status" with --fail. Except for --update, all flags are passed to the commands.
 `.trimStart();
 
+/**
+ * @returns {CommandDefinition['run']}
+ */
 function deferredCommand(importPath, exportName) {
   return (args, theme) => import(importPath).then(m => m[exportName](args, theme));
 }
+
+/** @type {import('./src/commands/find.js').Flag[]} */
+const findFlags = ['update', 'fail', 'json', 'verbose', 'special-characters'];
+/** @type {import('./src/commands/status.js').Flag[]} */
+const statusFlags = ['all', 'verbose', 'json', 'fail', 'strict'];
+/** @type {import('./src/commands/status.js').Parameter[]} */
+const statusParameters = ['base-lang'];
 
 /**
  * @satisfies {Record<string, CommandDefinition>}
  */
 const commands = {
   help: {
-    run: () => console.log(help),
+    run: () => {
+      console.log(help);
+      return 0;
+    },
   },
   find: {
-    /** @type {import('./src/commands/find.js').Flag[]} */
-    flags: ['update', 'fail', 'json', 'verbose', 'special-characters'],
+    flags: findFlags,
     run: deferredCommand('./src/commands/find.js', 'findCommand'),
   },
   status: {
-    flags: ['all', 'verbose', 'json', 'fail', 'strict'],
-    parameters: ['base-lang'],
+    flags: statusFlags,
+    parameters: statusParameters,
     run: deferredCommand('./src/commands/status.js', 'statusCommand'),
   },
+  ci: {
+    flags: [...findFlags, ...statusFlags],
+    parameters: statusParameters,
+    async run(options, theme) {
+      options.fail = true;
+      options.update = false;
+      const [findResult, statusResult] = await Promise.all([
+        commands.find.run(options, theme),
+        commands.status.run(options, theme),
+      ]);
+
+      return findResult + statusResult;
+    },
+  }
 };
 
 if (argv.length < 4) {
@@ -115,7 +143,8 @@ async function run () {
   const Visitor = multiVisitor(visitors);
   const context = await readTheme(themePath, Visitor);
 
-  command(args, context);
+  const exitCode = await command(args, context);
+  exit(exitCode ?? 0);
 }
 
 run().catch(error => {

@@ -1,5 +1,4 @@
 // @ts-check
-const {exit} = require('node:process');
 const fs = require('node:fs/promises');
 
 /**
@@ -128,7 +127,8 @@ async function applyThemeChanges(theme, changesPerFile, verbose) {
     );
   }
 
-  return Promise.all(promises);
+  await Promise.all(promises);
+  return 0;
 }
 
 /**
@@ -177,7 +177,7 @@ function findCommand(options, theme) {
     }
   }
 
-  exit(Number(fail ? Boolean(textToTranslate.size) : 0));
+  return Number(fail ? Boolean(textToTranslate.size) : 0);
 }
 
 module.exports.findCommand = findCommand;
