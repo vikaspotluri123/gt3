@@ -46,7 +46,7 @@ const commands = {
   },
   find: {
     /** @type {import('./src/commands/find.js').Flag[]} */
-    flags: ['update', 'fail', 'json', 'verbose', 'specialCharacters'],
+    flags: ['update', 'fail', 'json', 'verbose', 'special-characters'],
     run: deferredCommand('./src/commands/find.js', 'findCommand'),
   },
   status: {

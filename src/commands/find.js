@@ -4,7 +4,7 @@ const fs = require('node:fs/promises');
 
 /**
  * @typedef {import('../types').ParsedTheme} ParsedTheme
- * @typedef {'update' | 'fail' | 'json' | 'verbose' | 'specialCharacters'} Flag
+ * @typedef {'update' | 'fail' | 'json' | 'verbose' | 'special-characters'} Flag
  * @typedef {never} Parameter
  * @typedef {Record<Flag, boolean> & Record<Parameter, string>} Options
  *
@@ -136,7 +136,7 @@ async function applyThemeChanges(theme, changesPerFile, verbose) {
  * @param {ParsedTheme} theme
  */
 function findCommand(options, theme) {
-  const {update, fail, json, verbose, specialCharacters} = options;
+  const {update, fail, json, verbose, 'special-characters': specialCharacters} = options;
 
   if (update && fail) {
     console.error('Error: Cannot use --update and --fail together');
