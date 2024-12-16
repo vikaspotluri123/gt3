@@ -23,55 +23,9 @@ function markerOfWidth(width) {
     return MARKER_START + '.'.repeat(width - MIN_MARKER_WIDTH) + MARKER_END;
 }
 
-function writeDebugFile(fileName, contents) {
-    const fs = require('fs');
-    const path = require('path');
-
-    const filePath = path.join(process.cwd(), 'source-debug', fileName);
-    const dir = path.dirname(filePath);
-    fs.mkdirSync(dir, {recursive: true});
-    fs.writeFileSync(filePath, contents.join('\n'));
-}
-
-function debug(node) {
+function notImplemented(node) {
     debugger;
-}
-
-let debugOriginalSource = false;
-
-/**
- * Serializes a location based on `sourceLines`
- * @param {MarkUsedHelpers} instance the current rule
- * @param {Parameters<import('handlebars').Visitor['accept']>[0] | Position} nodeOrStart either a node or a start position
- * @param {Position} [end] When provided, assumes that `nodeOrStart` is a start position
- * @example `debugGetSource(rule, node)`
- * @example `debugGetSource(rule, nodeA.loc.start, nodeB.loc.end)`
- */
-function debugGetSource (instance, nodeOrStart, end) {
-    /** @type {Parameters<import('handlebars').Visitor['accept']>[0]} */
-    let node;
-    if (end) {
-        // @ts-ignore this is a debug function, we don't strictly type check
-        node = {loc: {start: nodeOrStart, end}};
-    } else {
-        // @ts-ignore this is a debug function, we don't strictly type check
-        node = nodeOrStart;
-    }
-
-    const lineStore = debugOriginalSource ? instance.originalSourceLines : instance.sourceLines;
-    const lines = lineStore.slice(node.loc.start.line - 1, node.loc.end.line);
-    // Process the ending line first so the index doesn't need to be normalized
-    lines[lines.length - 1] = lines[lines.length - 1].slice(0, node.loc.end.column);
-    lines[0] = lines[0].slice(node.loc.start.column);
-    return lines.join('\n');
-}
-
-/**
- * @param {any} node
- * @returns {node is Parameters<import('handlebars').Visitor['BlockStatement']>[0]}
- */
-function isBlockNode(node) {
-    return node.type === 'BlockStatement';
+    throw new Error('Not implemented');
 }
 
 /**
@@ -109,7 +63,7 @@ class MarkUsedHelpers extends Rule {
             return;
         }
 
-        writeDebugFile(this.fileName, this.sourceLines);
+        globalThis.writeDebugFile?.(this.fileName, this.sourceLines);
 
         const cheerio = require('cheerio');
         const $ = cheerio.load(this._textContent, {sourceCodeLocationInfo: true});
@@ -172,12 +126,12 @@ class MarkUsedHelpers extends Rule {
     }
 
     PartialStatement = this.markSourceVisitor.bind(this);
-    PartialBlockStatement = debug;
-    DecoratorBlock = debug;
-    Decorator = debug;
+    PartialBlockStatement = notImplemented;
+    DecoratorBlock = notImplemented;
+    Decorator = notImplemented;
     MustacheStatement = this.markSourceVisitor.bind(this);
     CommentStatement = this.markSourceVisitor.bind(this);
-    SubExpression = debug;
+    SubExpression = notImplemented;
 
     /**
      * @type {import('handlebars').Visitor['BlockStatement']}
