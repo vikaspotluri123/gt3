@@ -32,6 +32,8 @@ Commands:
   status <path-to-theme> : Reports the translation status of each locale. Empty translations are ignored.
     --all: Report fully translated locales, not just those with untranslated strings
     --base-locale=<locale>: Use this locale as the fully translated reference instead of reading the theme
+    --json: Output the results in JSON format
+    --verbose: List the missing/extra strings for each locale
 `.trimStart();
 
 function deferredCommand(importPath, exportName) {
@@ -51,11 +53,9 @@ const commands = {
     run: deferredCommand('./src/commands/find.js', 'findCommand'),
   },
   status: {
-    flags: ['all'],
+    flags: ['all', 'verbose', 'json'],
     parameters: ['base-lang'],
-    run() {
-      throw new Error('not implemented');
-    },
+    run: deferredCommand('./src/commands/status.js', 'statusCommand'),
   },
 };
 
