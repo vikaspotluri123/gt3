@@ -126,12 +126,13 @@ function parseCommand() {
 	return {
 		args,
 		themePath,
+		commandName,
 		command: command.run,
 	};
 }
 
 async function run() {
-	const {themePath, args, command} = parseCommand();
+	const {themePath, args, command, commandName} = parseCommand();
 	const readTheme = require('../src/read-theme.js');
 	const {multiVisitor} = require('../src/ast/visitors/many.js');
 	const visitors = [
@@ -141,6 +142,8 @@ async function run() {
 
 	const Visitor = multiVisitor(visitors);
 	const context = await readTheme(themePath, Visitor);
+
+	require('../src/commands/_internal/check-initialization.js').checkInitialization(context, commandName);
 
 	const exitCode = await command(args, context);
 	exit(exitCode ?? 0);
