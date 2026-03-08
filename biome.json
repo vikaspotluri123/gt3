@@ -9,11 +9,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": [
-			"./src/**/*.js",
-			"./bin/*.js",
-			"./test/**/*.js"
-		]
+		"includes": ["./src/**/*.js", "./bin/*.js", "./test/**/*.js"]
 	},
 	"formatter": {
 		"enabled": true,
