@@ -11,7 +11,8 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"./src/**/*.js",
-			"./bin/*.js"
+			"./bin/*.js",
+			"./test/**/*.js"
 		]
 	},
 	"formatter": {
