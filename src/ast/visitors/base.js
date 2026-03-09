@@ -60,16 +60,22 @@ class BaseVisitor extends Visitor {
 		super();
 		this.source = options.source;
 		this.fileName = options.fileName;
-
-		for (const method of VISITOR_METHODS) {
-			this[method] = wrappedVisitor(method, this[method]);
-		}
 	}
 
 	/**
 	 * @param {import('../types.js').Node} node
 	 */
 	enter(node) {
+		// Wrap visitor methods here (not in the constructor) so that subclass
+		// class-field initializers — which run after super() — are captured.
+		if (!this._methodsWrapped) {
+			for (const method of VISITOR_METHODS) {
+				this[method] = wrappedVisitor(method, this[method]);
+			}
+
+			this._methodsWrapped = true;
+		}
+
 		this.accept(node);
 		this.afterEnter();
 	}

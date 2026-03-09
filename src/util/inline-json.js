@@ -59,7 +59,8 @@ function stringifyJson(object) {
 	assertHasAnnotations(object);
 	const newline = object[NEWLINE];
 	const indentation = object[INDENTATION];
-	const serialized = JSON.stringify(object, null, indentation);
+	const sortedKeys = Object.keys(object).sort((a, b) => a.localeCompare(b));
+	const serialized = JSON.stringify(object, sortedKeys, indentation);
 
 	return newline === '\n' ? serialized : serialized.replaceAll('\n', newline) + newline;
 }

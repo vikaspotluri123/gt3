@@ -2,7 +2,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {parseWithoutProcessing} = require('handlebars');
-const {parseJson} = require('./util/inline-json.js');
+const {getLocales} = require('./util/read-locales.js');
 
 /**
  * @typedef {import('./types.js').ParsedTheme} ParsedTheme
@@ -66,33 +66,8 @@ async function getHandlebarsFiles(themePath, ignore) {
 /**
  * @param {string} themePath
  */
-async function getLocales(themePath) {
-	const localesPath = path.join(themePath, 'locales');
-	/** @type {Record<string, Record<string, string>>} */
-	const locales = {};
-
-	if (
-		!(await fs.stat(localesPath).then(
-			(stat) => stat.isDirectory(),
-			() => false,
-		))
-	) {
-		return locales;
-	}
-
-	const promises = [];
-
-	for await (const file of fs.glob(`${localesPath}/*.json`)) {
-		const locale = path.parse(file).name;
-		promises.push(
-			fs.readFile(file, 'utf8').then((contents) => {
-				locales[locale] = parseJson(contents);
-			}),
-		);
-	}
-
-	await Promise.all(promises);
-	return locales;
+function getThemeLocales(themePath) {
+	return getLocales(path.join(themePath, 'locales'));
 }
 
 /**
@@ -102,7 +77,7 @@ async function getLocales(themePath) {
  */
 module.exports = async function readTheme(themePath, Visitor) {
 	const resolvedThemePath = path.join(themePath, '.');
-	const locales = getLocales(resolvedThemePath);
+	const locales = getThemeLocales(resolvedThemePath);
 	const ignore = await readGitIgnore(resolvedThemePath);
 	const files = await getHandlebarsFiles(resolvedThemePath, ignore);
 	const visitorContext = Visitor.createContext();

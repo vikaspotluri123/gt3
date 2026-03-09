@@ -218,10 +218,14 @@ class TextExtractorVisitor extends BaseVisitor {
 			}
 		} else if (ifTrue) {
 			this.markSource(loc.start, ifTrue.loc.start);
-			this.markSource(ifTrue.loc.end, loc.end);
+			if (!isLocSame(ifTrue.loc.end, loc.end)) {
+				this.markSource(ifTrue.loc.end, loc.end);
+			}
 		} else if (ifFalse) {
 			this.markSource(loc.start, ifFalse.loc.start);
-			this.markSource(ifFalse.loc.end, loc.end);
+			if (!isLocSame(ifFalse.loc.end, loc.end)) {
+				this.markSource(ifFalse.loc.end, loc.end);
+			}
 		} else {
 			throw new Error('Unexpected state');
 		}

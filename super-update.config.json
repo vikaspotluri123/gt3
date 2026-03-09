@@ -1,0 +1,38 @@
+{
+  "themesRepo": ".",
+  "output": "packages/theme-translations/locales",
+  "themePackages": {
+    "path": "packages",
+    "exclude": ["_shared", "theme-translations"]
+  },
+  "sharedPartials": "packages/_shared/partials",
+  "externalSources": [
+    {
+      "name": "casper",
+      "repo": "TryGhost/Casper",
+      "ref": "main",
+      "local": null
+    },
+    {
+      "name": "source",
+      "repo": "TryGhost/Source",
+      "ref": "main",
+      "local": null
+    },
+    {
+      "name": "ghost-tpl",
+      "repo": "TryGhost/Ghost",
+      "ref": "main",
+      "path": "ghost/core/core/frontend/helpers/tpl",
+      "local": null
+    },
+    {
+      "name": "ghost-private",
+      "repo": "TryGhost/Ghost",
+      "ref": "main",
+      "path": "ghost/core/core/frontend/apps/private-blogging/lib/views",
+      "files": ["private.hbs"],
+      "local": null
+    }
+  ]
+}
