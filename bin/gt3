@@ -21,6 +21,9 @@ Commands:
 
   help : Print his help message
 
+	init <path-to-theme> : Adds basic translation support to a theme - extracts strings into locales/en.json and creates the context file
+	  --no-update: Do not modify theme files (only create locale files)
+
   find <path-to-theme> : Finds untranslated strings
     --special-characters: Consider strings of only special characters as untranslated
     --update: Automatically wrap untranslated strings and add them to locales. This will modify your theme files, so be careful!
@@ -53,6 +56,8 @@ const findFlags = ['update', 'fail', 'json', 'verbose', 'special-characters'];
 const statusFlags = ['all', 'verbose', 'json', 'fail', 'strict', 'update'];
 /** @type {import('../src/commands/status.js').Parameter[]} */
 const statusParameters = ['base-lang'];
+/** @type {import('../src/commands/init.js').Flag[]} */
+const initFlags = ['no-update'];
 
 /**
  * @satisfies {Record<string, CommandDefinition>}
@@ -63,6 +68,10 @@ const commands = {
 			console.log(help);
 			return 0;
 		},
+	},
+	init: {
+		flags: initFlags,
+		run: deferredCommand('../src/commands/init.js', 'initCommand'),
 	},
 	find: {
 		flags: findFlags,
